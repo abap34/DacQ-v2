@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> DacQ </title>
+</head>
+<body>
+    <!-- CSVファイルをアップロードするフォーム -->
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+    
+    <!-- ランキングを表示 -->
+    <!-- ユーザ名, アイコン, スコア, 最終更新日時 -->
+    <h2>Ranking</h2>
+    <table>
+        <tr>
+            <th>Rank</th>
+            <th>User</th>
+            <th>Icon</th>
+            <th>Score</th>
+            <th>Last Updated</th>
+        </tr>
+        {% for rank in ranking %}
+        <tr>
+            <td>{{ rank.rank }}</td>
+            <td>{{ rank.user }}</td>
+            <td><img src="{{ rank.icon }}" alt="icon" width="50" height="50"></td>
+            <td>{{ rank.score }}</td>
+            <td>{{ rank.updated_at }}</td>
+        </tr>
+        {% endfor %}
+</body>
+</html>
