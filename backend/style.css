@@ -1,0 +1,10 @@
+/* 背景オレンジに */
+body {
+  background-color: #FFA500 !important;
+}
+
+
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+}

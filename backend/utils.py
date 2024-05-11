@@ -1,38 +1,9 @@
 
-import pymysql
 import pandas as pd
 import datetime
 from datetime import timezone
 
-def get_submit() -> pd.DataFrame:
-    config = {
-        'host': 'mariadb',
-        'port': 3306,
-        'user': 'root',
-        'password': 'password',
-        'db': 'app_db',
-        'charset': 'utf8mb4',
-        'cursorclass': pymysql.cursors.DictCursor
-    }
-    
-    # データベースに接続
-    connection = pymysql.connect(**config)
-    
-    try:
-        with connection.cursor() as cursor:
-            # テーブルの内容を取得
-            sql = "SELECT * FROM posts"
-            cursor.execute(sql)
-            result = cursor.fetchall()
-            
-            # 結果をDataFrameに変換
-            df = pd.DataFrame(result)
-            return df
-    
-    finally:
-        # データベース接続を閉じる
-        connection.close()
-
+from const import Constants
 
 def readable_timedelta(td: datetime.timedelta) -> str:
     days = td // datetime.timedelta(days=1)
@@ -57,7 +28,9 @@ def readable_timedelta(td: datetime.timedelta) -> str:
 
 def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
     # ユーザの最高スコア順に並び替え. user ごとに uniqe にして最高スコアのみを取得
-    ranking = df.sort_values('public_score', ascending=False).groupby('username').head(1)
+    ascending = (Constants.SCORE_BETTERDIRECTION == 'smaller')
+
+    ranking = df.sort_values('public_score', ascending=ascending).groupby('username').head(1)
 
     ranking['rank'] = range(1, len(ranking) + 1)
     ranking['submitcount'] = ranking['username'].map(df['username'].value_counts())
@@ -71,3 +44,18 @@ def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
 
     ranking = ranking[['rank', 'username', 'public_score', 'submitcount', 'lastsubmit']]
     return ranking
+
+def is_best_score(df: pd.DataFrame, score: float) -> bool:
+    if df.empty:
+        return True
+    if Constants.SCORE_BETTERDIRECTION == 'smaller':
+        return score < df['public_score'].min()
+    else:
+        return score > df['public_score'].max()
+
+
+def load_css(path: str) -> str:
+    with open(path) as f:
+        css = f.read()
+    return f"<style>{css}</style>"
+
