@@ -1,0 +1,73 @@
+
+import pymysql
+import pandas as pd
+import datetime
+from datetime import timezone
+
+def get_submit() -> pd.DataFrame:
+    config = {
+        'host': 'mariadb',
+        'port': 3306,
+        'user': 'root',
+        'password': 'password',
+        'db': 'app_db',
+        'charset': 'utf8mb4',
+        'cursorclass': pymysql.cursors.DictCursor
+    }
+    
+    # データベースに接続
+    connection = pymysql.connect(**config)
+    
+    try:
+        with connection.cursor() as cursor:
+            # テーブルの内容を取得
+            sql = "SELECT * FROM posts"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            
+            # 結果をDataFrameに変換
+            df = pd.DataFrame(result)
+            return df
+    
+    finally:
+        # データベース接続を閉じる
+        connection.close()
+
+
+def readable_timedelta(td: datetime.timedelta) -> str:
+    days = td // datetime.timedelta(days=1)
+    hours = td // datetime.timedelta(hours=1) % 24
+    minutes = td // datetime.timedelta(minutes=1) % 60
+    seconds = td // datetime.timedelta(seconds=1) % 60
+
+    if days < 1:
+        if hours < 1:
+            if minutes < 1:
+                if seconds < 30:
+                    return "just now"
+                else:
+                    return f"{seconds} seconds ago"
+            else:
+                return f"{minutes} minutes ago"
+        else:
+            return f"{hours} hours ago"
+    else:
+        return f"{days} days ago"
+    
+
+def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
+    # ユーザの最高スコア順に並び替え. user ごとに uniqe にして最高スコアのみを取得
+    ranking = df.sort_values('public_score', ascending=False).groupby('username').head(1)
+
+    ranking['rank'] = range(1, len(ranking) + 1)
+    ranking['submitcount'] = ranking['username'].map(df['username'].value_counts())
+    
+    # tz/tokyo に合わせる
+    now = datetime.datetime.now() + datetime.timedelta(hours=9)
+
+    ranking['lastsubmit'] = ranking['username'].map(now - df.groupby('username')['post_date'].max())
+
+    ranking['lastsubmit'] = ranking['lastsubmit'].apply(readable_timedelta)
+
+    ranking = ranking[['rank', 'username', 'public_score', 'submitcount', 'lastsubmit']]
+    return ranking

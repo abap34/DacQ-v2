@@ -17,10 +17,10 @@ services:
       MYSQL_DATABASE: app_db
       MYSQL_USER: root 
       MYSQL_PASSWORD: password
+      TZ: Asia/Tokyo
     volumes:
-      - mariadb_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --init-file /docker-entrypoint-initdb.d/init.sql
-    
+
 volumes:
   mariadb_data:
