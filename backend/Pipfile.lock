@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8abd6f02b7f41d5db538ae47539ef4565890c4b8960b09a4775e37c827189893"
+            "sha256": "9f6e897dbd452c0216835ccc87ab1086d865a2a5686881c8c9e065765204219b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -573,7 +573,7 @@
                 "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
             ],
             "index": "pypi",
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==2.9.0.post0"
         },
         "pytz": {
@@ -783,7 +783,7 @@
                 "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"
             ],
             "index": "pypi",
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==1.16.0"
         },
         "smmap": {
@@ -803,6 +803,15 @@
             "index": "pypi",
             "markers": "python_version >= '3.8' and python_full_version != '3.9.7'",
             "version": "==1.34.0"
+        },
+        "streamlit-option-menu": {
+            "hashes": [
+                "sha256:a954241cf188691f17072cf3ceb59e97f106f7492ddb5b79c4d42906758a5af2",
+                "sha256:f83045da205f83464e6606a80facfec2cde49fe750e1148eb275c88ddcca35b9"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.6'",
+            "version": "==0.3.12"
         },
         "tenacity": {
             "hashes": [
@@ -828,7 +837,7 @@
                 "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"
             ],
             "index": "pypi",
-            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2'",
+            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==0.10.2"
         },
         "toolz": {
