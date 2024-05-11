@@ -6,15 +6,14 @@ from streamlit_option_menu import option_menu
 from score import validate, score, ValidateState
 from db import get_submit, add_submit
 from const import Constants
-from utils import to_ranking, load_css, is_best_score
+from utils import to_ranking, load_css, is_best_score, get_score_progress
+from user import get_username
 
 
 def main():
-    st.set_page_config(
-        page_title="DacQ",
-        page_icon="📈",
-        layout="wide",
-    )
+    username = get_username()
+
+    st.title(f"📈 - DacQ - 📊 ‍💻 Welcome {username} !")
 
     st.markdown(
         load_css("style.css"),
@@ -43,7 +42,21 @@ def main():
     if selected == "LeaderBoard":
         ranking = to_ranking(submit)
         st.write("Ranking")
-        st.write(ranking)
+        st.dataframe(
+            ranking,
+            column_config={
+                "rank": {},
+                "icon": st.column_config.ImageColumn(
+                    width=50,
+                ),
+                "username": {},
+                "score": st.column_config.NumberColumn(
+                    format="%.5f",
+                ),
+                "submitcount": {},
+                "lastsubmit": {},
+            },
+        )
 
     elif selected == "Submit":
         uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
@@ -67,7 +80,7 @@ def main():
 
                 # db に反映
                 add_submit("abap34", score_value, score_value)
-   
+
     elif selected == "Rules":
         st.write("Rules")
         st.markdown(
@@ -75,14 +88,19 @@ def main():
             # 👀 Big Brother is watching you 🫵
             """
         )
-    
+
     elif selected == "Score Log":
         all_user = submit["username"].unique()
         user = st.selectbox("Select user", all_user)
-        user_submit = submit[submit["username"] == user]
-        user_score = user_submit["public_score"]
-        st.line_chart(user_score)
+        st.line_chart(get_score_progress(submit, user)["progress"])
 
 
 if __name__ == "__main__":
+
+    st.set_page_config(
+        page_title="DacQ",
+        page_icon="📈",
+        layout="wide",
+    )
+
     main()
