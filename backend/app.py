@@ -1,27 +1,53 @@
-from flask import Flask, render_template
+import streamlit as st
+import pandas as pd
+
+st.title("Hello World!")
+
+df = pd.DataFrame({
+    "A": [1, 2, 3, 4],
+    "B": [10, 20, 30, 40]
+})  
+
+st.write(df)
 
 
-from models import db, Submit
+import pymysql.cursors
+
+import pymysql
+
+def fetch_data_to_dataframe():
+    # データベース設定
+    config = {
+        'host': 'mariadb',
+        'port': 3306,
+        'user': 'root',
+        'password': 'password',
+        'db': 'app_db',
+        'charset': 'utf8mb4',
+        'cursorclass': pymysql.cursors.DictCursor
+    }
+    
+    # データベースに接続
+    connection = pymysql.connect(**config)
+    
+    try:
+        with connection.cursor() as cursor:
+            # テーブルの内容を取得
+            sql = "SELECT * FROM posts"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            
+            # 結果をDataFrameに変換
+            df = pd.DataFrame(result)
+            return df
+    
+    finally:
+        # データベース接続を閉じる
+        connection.close()
 
 
-app = Flask(__name__, static_folder='./template/static', template_folder='./template')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@localhost:5432/database'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+df = fetch_data_to_dataframe()
 
-db.init_app(app)
-
-@app.route('/')
-def hello_world():
-    return render_template('index.html', ranking=Submit.query.all())
-
-# <form action="/upload" method="post" enctype="multipart/form-data">
-@app.route('/upload', methods=['POST'])
-def upload():
-    return render_template('upload.html', name='World', result='Success')
-
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5001,host='0.0.0.0')
-
-
+st.write("データベースから取得したデータ:")
+st.write(df)
