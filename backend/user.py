@@ -6,5 +6,5 @@ def get_username():
     headers = _get_websocket_headers()
     user = headers.get("X-Forwarded-User")
     if user is None:
-        user = "Unkown"
+        user = "Unknown"
     return user
