@@ -5,8 +5,10 @@ services:
     build: ./backend
     ports:
       - "5001:5001"
-    depends_on:
-      - mariadb
+    # TODO: healthcheck
+    # depends_on:
+    #   mariadb:
+    #     condition: service_healthy
 
   mariadb:
     image: mariadb
@@ -15,12 +17,17 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: app_db
-      MYSQL_USER: root 
+      MYSQL_USER: root
       MYSQL_PASSWORD: password
       TZ: Asia/Tokyo
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --init-file /docker-entrypoint-initdb.d/init.sql
+    # healthcheck:
+    #   test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p", "password"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
 
 volumes:
   mariadb_data:
