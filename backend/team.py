@@ -1,5 +1,7 @@
 import pandas as pd
 from PIL import Image
+
+# base64
 import io
 
 from const import Constants
@@ -15,9 +17,7 @@ def validate_team(df: pd.DataFrame) -> bool:
     if df.columns.tolist().sort() != ["id", "user1", "user2", "user3"].sort():
         raise ValueError("Invalid column name! Please check the data.")
 
-    all_user = pd.concat(
-        [df["user1"], df["user2"], df["user3"]], ignore_index=True
-    )
+    all_user = pd.concat([df["user1"], df["user2"], df["user3"]], ignore_index=True)
 
     all_user = all_user.dropna()
 
@@ -29,17 +29,18 @@ def validate_team(df: pd.DataFrame) -> bool:
 
 # db にチームの初期データを追加
 # デフォルトのチーム名は "team {i}"
-# デフォルトのアイコンは data/default_icon.png
+# デフォルトのアイコンは static/default_icon.png
 def setup_team(allow_duplicated: bool = False):
     team_df = pd.read_csv(Constants.TEAM_PATH)
     validate_team(team_df)
 
-    icon_binaries = Image.open("data/default_icon.png").tobytes()
+    with open("static/default_icon.png", "rb") as f:
+        default_icon = f.read()
 
     for i in range(len(team_df)):
         team_id = team_df["id"][i]
         name = f"team {i}"
-        icon_binaries = b""
+        icon_binaries = default_icon
         add_team(team_id, name, icon_binaries, allow_duplicated)
 
 
@@ -52,6 +53,7 @@ def get_teamid(username: str) -> int:
 
     return team_id
 
+
 def get_teamicon(team_id: int) -> Image:
 
     team_icon = db.get_teamicon(team_id)
@@ -61,10 +63,10 @@ def get_teamicon(team_id: int) -> Image:
 
     return team_icon
 
+
 def get_teamname(usernames: str) -> str:
     team_id = get_teamid(usernames)
 
     team_name = get_team(team_id)["name"]
 
     return team_name
-
