@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime
 from datetime import timezone
+from typing import Tuple
 
 import numpy as np
 
@@ -80,9 +81,8 @@ def to_ranking(submitlog: pd.DataFrame) -> pd.DataFrame:
     ranking["lastsubmit"] = ranking["lastsubmit"].apply(readable_timedelta)
 
     # アイコン用の列追加
-    ranking["icon"] = ranking["username"].apply(name_to_icon_url)
-
-    # チーム名を取得
+    ranking["icon"] = ranking["teamid"].apply(get_teamicon)
+    
     ranking["teamname"] = ranking["teamid"].apply(get_teamname)
 
     ranking = ranking.rename(columns={"public_score": "score"})
@@ -151,3 +151,19 @@ def get_sns_message_by_rank(rank: int) -> str:
         )
 
     return message
+
+
+def is_best_score(submitlog: pd.DataFrame, username: str, score: float) -> Tuple[bool, float]:
+    team_subs = submitlog[submitlog["username"] == username]
+
+    if team_subs.empty:
+        return True, np.nan
+    
+    if Constants.SCORE_BETTERDIRECTION == "smaller":
+        return score < team_subs["public_score"].min(), team_subs["public_score"].min()
+    else:
+        return score > team_subs["public_score"].max(), team_subs["public_score"].max()
+    
+
+
+    
