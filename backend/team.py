@@ -1,5 +1,6 @@
 import pandas as pd
 from PIL import Image
+from typing import List
 
 # base64
 import io
@@ -55,7 +56,6 @@ def get_teamid(username: str) -> int:
 
 
 def get_teamicon(team_id: int) -> Image:
-
     team_icon = db.get_teamicon(team_id)
 
     # read binary data
@@ -70,3 +70,15 @@ def get_teamname(usernames: str) -> str:
     team_name = get_team(team_id)["name"]
 
     return team_name
+
+
+def get_members(team_id: int) -> List[str]:
+    team_df = pd.read_csv(Constants.TEAM_PATH)
+
+    team = team_df[team_df["id"] == team_id]
+
+    return [
+        team["user1"].values[0],
+        team["user2"].values[0],
+        team["user3"].values[0],
+    ]

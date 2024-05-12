@@ -7,8 +7,14 @@ import io
 from score import validate, score, ValidateState
 from db import get_submit, add_submit, update_teamicon, update_teamname
 from const import Constants
-from utils import to_ranking, get_score_progress, get_sns_message, load_env
-from team import setup_team
+from utils import (
+    to_ranking,
+    get_score_progress,
+    get_sns_message,
+    load_env,
+    name_to_icon_url,
+)
+from team import setup_team, get_members
 
 
 def select_leaderboard(env):
@@ -77,9 +83,31 @@ def select_submit(env):
 def select_team_setting(env):
     # チーム名設定
     st.write("## Team Setting")
-    st.write("Team Name: " + env["teamname"])
-    st.write("Team Icon Setting")
-    st.image(env["teamicon"], caption="Current Icon")
+
+    # 左右分割
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("### Team Name: " + env["teamname"])
+        st.image(env["teamicon"], caption="Current Icon")
+    with col2:
+        st.write("### Members")
+        members = get_members(env["teamid"])
+        members_df = pd.DataFrame(members, columns=["username"])
+        members_df["icon"] = members_df["username"].apply(name_to_icon_url)
+        st.dataframe(
+            members_df[["icon", "username"]],
+            hide_index=True,
+            column_config={
+                "icon": st.column_config.ImageColumn(
+                    label="",
+                    width=50,
+                ),
+                "username": {
+                    "width": 200,
+                },
+            },
+        )
 
     # チーム名入力フォーム
     team_name = st.text_input("Enter your team name", env["teamname"], max_chars=32)
@@ -127,11 +155,20 @@ def main():
 
     st.header(
         """
-        寿司食べ犬すいコンテスト
+        # 寿司食べ犬すいコンテスト
 
         """,
         anchor="top",
         divider="orange",
+    )
+
+    selected = option_menu(
+        None,
+        ["LeaderBoard", "Submit", "Rules", "Score Log", "Team Setting"],
+        icons=["house", "cloud-upload", "list-task", "file-earmark-text", "people"],
+        menu_icon="cast",
+        default_index=0,
+        orientation="horizontal",
     )
 
     st.caption(f"Login as {env['username']}")
@@ -166,15 +203,6 @@ def main():
     st.sidebar.link_button(
         "traQ に現在の順位を投稿する",
         f"https://q.trap.jp/share-target?text={get_sns_message(get_submit(), env['username'])}",
-    )
-
-    selected = option_menu(
-        None,
-        ["LeaderBoard", "Submit", "Rules", "Score Log", "Team Setting"],
-        icons=["house", "cloud-upload", "list-task", "file-earmark-text", "people"],
-        menu_icon="cast",
-        default_index=0,
-        orientation="horizontal",
     )
 
     # 順位表
