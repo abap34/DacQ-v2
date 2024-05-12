@@ -58,6 +58,4 @@ INSERT INTO submitlog (post_date, username, public_score, private_score)
 VALUES (STR_TO_DATE('2024-05-10 03:00:00', '%Y-%m-%d %H:%i:%s'), 'abap34', 0.3, 0.8);
 INSERT INTO submitlog (post_date, username, public_score, private_score)
 VALUES (STR_TO_DATE('2024-05-11 05:00:00', '%Y-%m-%d %H:%i:%s'), 'abap34', 0.1, 0.5);
-INSERT INTO submitlog (post_date, username, public_score, private_score)
-VALUES (STR_TO_DATE('2024-05-11 16:00:00', '%Y-%m-%d %H:%i:%s'), 'abap34', 0.06, 0.5);
 
