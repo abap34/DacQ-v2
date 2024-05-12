@@ -23,6 +23,7 @@ def load_env():
         "teamicon": teamicon,
     }
 
+
 def readable_timedelta(td: datetime.timedelta) -> str:
     days = td // datetime.timedelta(days=1)
     hours = td // datetime.timedelta(hours=1) % 24
@@ -66,9 +67,7 @@ def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
     ranking["lastsubmit"] = ranking["lastsubmit"].apply(readable_timedelta)
 
     # アイコン用の列追加
-    ranking["icon"] = ranking["username"].apply(
-        lambda name: f"https://q.trap.jp/api/v3/public/icon/{name}"
-    )
+    ranking["icon"] = ranking["username"].apply(name_to_icon_url)
 
     ranking = ranking.rename(columns={"public_score": "score"})
 
@@ -77,7 +76,6 @@ def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
     ]
 
     return ranking
-
 
 
 def get_score_progress(df: pd.DataFrame, username: str) -> pd.DataFrame:
@@ -133,3 +131,7 @@ def get_sns_message_by_rank(rank: int) -> str:
         )
 
     return message
+
+
+def name_to_icon_url(name: str) -> str:
+    return f"https://q.trap.jp/api/v3/public/icon/{name}"
