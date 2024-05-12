@@ -2,6 +2,8 @@ import streamlit as st
 from utils import load_env
 from streamlit_option_menu import option_menu
 
+from typing import Literal
+
 from PIL import Image
 import base64
 import io
@@ -21,6 +23,7 @@ import nbformat
 def read_nbimage(image: str) -> Image:
     return Image.open(io.BytesIO(base64.b64decode(image)))
 
+
 def render_html_out(html: str):
     st.write(
         f"""
@@ -34,7 +37,6 @@ def render_html_out(html: str):
 
 def render_notebook(notebook: bytes):
     notebook = nbformat.reads(notebook, as_version=4)
-    # 各セル入出力の type に応じて表示を変える
     for cell in notebook.cells:
         if cell.cell_type == "code":
             st.code(cell.source)
@@ -67,9 +69,23 @@ def _add_favorite(username, discussion):
     st.toast(f"❤️ {discussion.title} をいいねしました!", icon="👍")
 
 
+def sort_by(discussions, sort_method: Literal["新しい順", "いいねが多い順"]):
+    if sort_method == "新しい順":
+        return sorted(discussions, key=lambda x: x.post_date, reverse=True)
+    elif sort_method == "いいねが多い順":
+        return sorted(discussions, key=lambda x: get_favoritecount(x.id), reverse=True)
+
+
 def select_read(env):
     discussions = get_discussions()
-    discussions = sorted(discussions, key=lambda x: x.post_date, reverse=True)
+    # ソート順を選ぶ
+    sort_method = st.radio(
+        "表示順",
+        ["新しい順", "いいねが多い順"],
+        index=0,
+    )
+
+    discussions = sort_by(discussions, sort_method)
 
     for discussion in discussions:
         # 各投稿のタイトルのプレビューだけ出してクリックしたら表示
