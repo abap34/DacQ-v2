@@ -10,6 +10,7 @@ from db import add_team, get_team
 import db
 
 
+
 # df が
 # 1. id が unique
 # 2. カラムが [id, user1, user2, user3] からなる
@@ -89,3 +90,13 @@ def get_members(team_id: int) -> List[str]:
         team["user2"].values[0],
         team["user3"].values[0],
     ]
+
+
+def get_team_submit(submitlog: pd.DataFrame, teamid: int) -> pd.DataFrame:
+    submitlog["teamid"] = submitlog["username"].apply(get_teamid)
+
+    team_subs = submitlog[submitlog["teamid"] == teamid]
+
+    team_subs = team_subs.sort_values("post_date")
+
+    return team_subs
