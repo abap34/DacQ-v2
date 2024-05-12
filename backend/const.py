@@ -19,3 +19,5 @@ class Constants:
     SCORE_BETTERDIRECTION: Literal['smaller', 'larger'] = 'smaller'
 
     SELCTED = ['LeaderBoard', 'Submit', 'Rules', 'Score Log']
+
+    TEAM_PATH = 'data/team_setting.csv'
