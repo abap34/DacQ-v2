@@ -50,7 +50,12 @@ def get_teamid(username: str) -> int:
 
     melted = team_df.melt(id_vars=["id"], value_vars=["user1", "user2", "user3"])
 
-    team_id = melted[melted["value"] == username]["id"].values[0]
+    team_id = melted[melted["value"] == username]["id"].values
+
+    if len(team_id) == 0:
+        raise ValueError(f"User {username} is not in any team.")
+    else:
+        team_id = team_id[0]
 
     return team_id
 
@@ -64,12 +69,14 @@ def get_teamicon(team_id: int) -> Image:
     return team_icon
 
 
-def get_teamname(usernames: str) -> str:
+def get_teamname_from_username(usernames: str) -> str:
     team_id = get_teamid(usernames)
 
-    team_name = get_team(team_id)["name"]
+    return get_teamname(team_id)
 
-    return team_name
+def get_teamname(team_id: int) -> str:
+    return get_team(team_id)["name"]
+
 
 
 def get_members(team_id: int) -> List[str]:
