@@ -139,13 +139,15 @@ def get_discussions() -> List[Discussion]:
 
             discussions = []
             for row in result:
-                discussions.append(Discussion(
-                    id=row["id"],
-                    post_date=row["post_date"],
-                    title=row["title"],
-                    content=row["content"],
-                    username=row["username"],
-                ))
+                discussions.append(
+                    Discussion(
+                        id=row["id"],
+                        post_date=row["post_date"],
+                        title=row["title"],
+                        content=row["content"],
+                        username=row["username"],
+                    )
+                )
 
             return discussions
 
@@ -158,12 +160,15 @@ def add_discussion(title: str, content: bytes, username: str):
 
     try:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO discussion (title, content, username) VALUES (%s, %s, %s)"
+            sql = (
+                "INSERT INTO discussion (title, content, username) VALUES (%s, %s, %s)"
+            )
             cursor.execute(sql, (title, content, username))
             connection.commit()
 
     finally:
         connection.close()
+
 
 def get_favoritecount(discussion_id: int) -> int:
     connection = pymysql.connect(**Constants.DB_CONFIG)
@@ -179,25 +184,32 @@ def get_favoritecount(discussion_id: int) -> int:
     finally:
         connection.close()
 
-# いいねを追加
-def add_favorite(username: str, discussion_id: int):
+
+# いいねを追加. もし既にいいねしていたらそれを削除
+def put_favorite(username: str, discussion_id: int):
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
     try:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO likes (username, discussion_id) VALUES (%s, %s)"
+            if is_favorite(username, discussion_id):
+                sql = "DELETE FROM likes WHERE username = %s AND discussion_id = %s"
+            else:
+                sql = "INSERT INTO likes (username, discussion_id) VALUES (%s, %s)"
             cursor.execute(sql, (username, discussion_id))
             connection.commit()
 
     finally:
         connection.close()
 
+
 def is_favorite(username: str, discussion_id: int) -> bool:
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT COUNT(*) FROM likes WHERE username = %s AND discussion_id = %s"
+            sql = (
+                "SELECT COUNT(*) FROM likes WHERE username = %s AND discussion_id = %s"
+            )
             cursor.execute(sql, (username, discussion_id))
             result = cursor.fetchone()
 

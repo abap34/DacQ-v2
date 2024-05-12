@@ -9,7 +9,7 @@ import io
 from db import (
     get_discussions,
     add_discussion,
-    add_favorite,
+    put_favorite,
     get_favoritecount,
     is_favorite,
 )
@@ -42,6 +42,15 @@ def render_notebook(notebook: bytes):
             st.markdown(cell.source)
 
 
+def _add_favorite(username, discussion):
+    if is_favorite(username, discussion.id):
+        put_favorite(username, discussion.id)
+        return
+
+    put_favorite(username, discussion.id)
+    st.toast(f"❤️ {discussion.title} をいいねしました!", icon="👍")
+
+
 def select_read(env):
     discussions = get_discussions()
     discussions = sorted(discussions, key=lambda x: x.post_date, reverse=True)
@@ -55,10 +64,6 @@ def select_read(env):
             """
         )
 
-        def _add_favorite():
-            add_favorite(env["username"], discussion.id)
-            st.toast("いいねしました!", icon="👍")
-
         # いいねボタン
         fav_count = get_favoritecount(discussion.id)
 
@@ -69,6 +74,8 @@ def select_read(env):
         st.button(
             button_text,
             on_click=_add_favorite,
+            args=(env["username"], discussion),
+            key=f"fav_{discussion.id}",
         )
 
         with st.expander("中身を見る"):
