@@ -1,8 +1,12 @@
+from dataclasses import dataclass
+import datetime
 import pymysql.cursors
 import pandas as pd
 from PIL import Image
 import io
+from typing import List
 
+import streamlit as st
 
 from const import Constants
 
@@ -108,6 +112,96 @@ def update_teamicon(team_id: int, icon_binaries: bytes):
             sql = "UPDATE team SET icon = %s WHERE id = %s"
             cursor.execute(sql, (icon_binaries, team_id))
             connection.commit()
+
+    finally:
+        connection.close()
+
+
+@dataclass
+class Discussion:
+    id: int
+    post_date: datetime.datetime
+    title: str
+    content: str
+    username: str
+
+
+# Discussionの列を取得
+# 重いのでこれは cache する
+def get_discussions() -> List[Discussion]:
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM discussion"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            discussions = []
+            for row in result:
+                discussions.append(Discussion(
+                    id=row["id"],
+                    post_date=row["post_date"],
+                    title=row["title"],
+                    content=row["content"],
+                    username=row["username"],
+                ))
+
+            return discussions
+
+    finally:
+        connection.close()
+
+
+def add_discussion(title: str, content: bytes, username: str):
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO discussion (title, content, username) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (title, content, username))
+            connection.commit()
+
+    finally:
+        connection.close()
+
+def get_favoritecount(discussion_id: int) -> int:
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT COUNT(*) FROM likes WHERE discussion_id = %s"
+            cursor.execute(sql, discussion_id)
+            result = cursor.fetchone()
+
+            return result["COUNT(*)"]
+
+    finally:
+        connection.close()
+
+# いいねを追加
+def add_favorite(username: str, discussion_id: int):
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO likes (username, discussion_id) VALUES (%s, %s)"
+            cursor.execute(sql, (username, discussion_id))
+            connection.commit()
+
+    finally:
+        connection.close()
+
+def is_favorite(username: str, discussion_id: int) -> bool:
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT COUNT(*) FROM likes WHERE username = %s AND discussion_id = %s"
+            cursor.execute(sql, (username, discussion_id))
+            result = cursor.fetchone()
+
+            return result["COUNT(*)"] > 0
 
     finally:
         connection.close()
