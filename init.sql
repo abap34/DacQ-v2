@@ -1,10 +1,3 @@
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' 
-    IDENTIFIED BY 'password' 
-    WITH GRANT OPTION;
-
-FLUSH PRIVILEGES;
-
-
 CREATE DATABASE IF NOT EXISTS app_db;
 USE app_db;
 
