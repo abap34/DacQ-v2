@@ -203,13 +203,9 @@ def setup():
     )
 
 
-
-
 if __name__ == "__main__":
 
     if "has_run_setup" not in st.session_state:
         setup()
-
-    
 
     main()
