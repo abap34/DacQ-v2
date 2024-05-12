@@ -1,8 +1,12 @@
 import streamlit as st
 import pandas as pd
 from streamlit_option_menu import option_menu
+from streamlit_extras.let_it_rain import rain
 from PIL import Image
 import io
+import numpy as np
+import base64
+
 
 from score import validate, score, ValidateState
 from db import get_submit, add_submit, update_teamicon, update_teamname
@@ -13,13 +17,26 @@ from utils import (
     get_sns_message,
     load_env,
     name_to_icon_url,
+    is_best_score,
 )
-from team import setup_team, get_members, get_teamname, get_teamid
+
+from team import setup_team, get_members, get_teamname, get_teamid, get_team_submit
+
+
+def to_imagebase64(image: Image) -> str:
+    byte_io = io.BytesIO()
+    image.save(byte_io, format="PNG")
+    return "data:image/png;base64," + base64.b64encode(byte_io.getvalue()).decode(
+        "utf-8"
+    )
 
 
 def select_leaderboard(env):
     submit = get_submit()
     ranking = to_ranking(submit)
+
+    # ranking の icon を base64 に変換
+    ranking["icon"] = ranking["icon"].apply(to_imagebase64)
 
     st.write("Ranking")
     st.dataframe(
@@ -61,24 +78,80 @@ def select_rules(env):
 
 def select_submit(env):
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
+    submit = get_submit()
 
-        validate_state = validate(df)
-        if validate_state != 0:
-            st.warning("Invalid file: " + ValidateState.warning_message(validate_state))
-        else:
-            label = pd.read_csv(Constants.LABEL_PATH)
-            score_value = score(
-                label[Constants.LABEL_COL].values, df[Constants.PRED_COL].values
-            )
+    def _add_submit(username):
+        if uploaded_file is not None:
+            df = pd.read_csv(uploaded_file)
 
-            # ベストスコアかどうかを判定
-            # if not is_best_score(submit, score_value):
-            # ベストスコアページに遷移
+            validate_state = validate(df)
+            if validate_state != 0:
+                st.warning(
+                    "Invalid file: " + ValidateState.warning_message(validate_state)
+                )
+            else:
+                label = pd.read_csv(Constants.LABEL_PATH)
+                score_value = score(
+                    label[Constants.LABEL_COL].values, df[Constants.PRED_COL].values
+                )
 
-            # db に反映
-            add_submit(env["username"], score_value, score_value)
+                is_best, prev_best = is_best_score(submit, username, score_value)
+
+                # ベストスコアかどうかを判定
+                if not is_best:
+                    st.toast("Not the best score... Keep trying!", icon="😢")
+                else:
+                    # お祝い
+                    rain(
+                        emoji="🎉",
+                        animation_length=1,
+                        falling_speed=20,
+                    )
+
+                    st.success("Congratulations! You got the best score!")
+
+                    if np.isnan(prev_best):
+                        st.metric(
+                            label="Your First Score! Keep it up! 🦆",
+                            value=f"{score_value:.5f}",
+                        )
+                    else:
+                        st.metric(
+                            label="Best Score Updated ! ⤴️",
+                            value=f"{score_value:.5f}",
+                            delta=f"{score_value - prev_best:.5f}",
+                        )
+
+                    st.link_button(
+                        "スコア更新を traQ に共有する!",
+                        f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{score_value:.5f}です :nityaa_harsh:",
+                    )
+
+                add_submit(env["username"], score_value, score_value)
+
+    st.button(
+        "Submit !",
+        on_click=_add_submit,
+        args=(env["username"],),
+        type="primary",
+    )
+
+    # 自分たちのサブミット一覧を見る
+    team_subs = get_team_submit(submit, env["teamid"])
+
+    st.write("Team's Submit")
+    st.dataframe(
+        team_subs[["username", "public_score", "post_date"]],
+        hide_index=True,
+        column_config={
+            "username": {},
+            "public_score": st.column_config.NumberColumn(
+                format="%.5f",
+            ),
+            "post_date": {},
+        },
+        use_container_width=True,
+    )
 
 
 def select_team_setting(env):
@@ -151,12 +224,12 @@ def main():
     )
 
     st.markdown(
-        "### 開催中のコンテスト:",
+        "### 開催中のコンペ: ",
     )
 
     st.header(
         """
-        # 寿司食べ犬すいコンテスト
+        # コンペティション ① 🦆📊
 
         """,
         anchor="top",
@@ -223,13 +296,13 @@ def main():
         select_team_setting(env)
 
 
+INIT_DB = False
+
 def setup():
     st.session_state["has_run_setup"] = True
 
-    setup_team(
-        # TODO: リリース時には False
-        allow_duplicated=True
-    )
+    if INIT_DB:
+        setup_team(allow_duplicated=True)
 
 
 if __name__ == "__main__":
