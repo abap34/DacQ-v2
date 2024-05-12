@@ -71,7 +71,7 @@ def get_teamicon(team_id: int) -> bytes:
         connection.close()
 
 
-def add_team(team_id: int, name: str, icon_binaries: bytes, allow_duplicated: bool):
+def add_team(team_id: int, name: str, icon_binaries: bytes, skip: bool = False):
     connection = pymysql.connect(**Constants.DB_CONFIG)
     try:
         with connection.cursor() as cursor:
@@ -82,12 +82,13 @@ def add_team(team_id: int, name: str, icon_binaries: bytes, allow_duplicated: bo
                 sql = "INSERT INTO team (id, name, icon) VALUES (%s, %s, %s)"
                 cursor.execute(sql, (team_id, name, icon_binaries))
             else:
-                if not allow_duplicated:
-                    raise ValueError("ID already exists")
+                # ID が存在するならスキップ. ただしスキップフラグが立っていない場合は上書き
+                if not skip:
+                    update_teamname(team_id, name)
+                    update_teamicon(team_id, icon_binaries)
 
-                # IDが存在する場合は更新
-                sql = "UPDATE team SET name = %s, icon = %s WHERE id = %s"
-                cursor.execute(sql, (name, icon_binaries, team_id))
+                
+
             connection.commit()
     finally:
         connection.close()
