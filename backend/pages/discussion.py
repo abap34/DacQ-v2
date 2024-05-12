@@ -43,7 +43,6 @@ def render_notebook(notebook: bytes):
             for output in cell.outputs:
                 if output.output_type == "display_data":
                     st.image(read_nbimage(output.data["image/png"]))
-                    st.write(output.data.keys())
                 elif output.output_type == "execute_result":
                     if "text/html" in output.data:
                         render_html_out(output.data["text/html"])
@@ -113,6 +112,8 @@ def select_read(env):
         with st.expander("中身を見る"):
             render_notebook(discussion.content)
 
+        st.markdown("---")
+
 
 def select_write(env):
     title = st.text_input("Title")
@@ -161,7 +162,7 @@ def main():
     selected = option_menu(
         "ディスカッションを",
         ["よむ", "かく"],
-        icons=["📖", "📝"],
+        icons=["book", "pencil"],
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
