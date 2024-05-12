@@ -9,11 +9,13 @@ from user import get_username
 
 from const import Constants
 
+import streamlit as st
+
 
 def load_env():
     username = get_username()
-    teamname = get_teamname(username)
     teamid = get_teamid(username)
+    teamname = get_teamname(teamid)
     teamicon = get_teamicon(teamid)
 
     return {
@@ -22,6 +24,10 @@ def load_env():
         "teamid": teamid,
         "teamicon": teamicon,
     }
+
+
+def name_to_icon_url(name: str) -> str:
+    return f"https://q.trap.jp/api/v3/public/icon/{name}"
 
 
 def readable_timedelta(td: datetime.timedelta) -> str:
@@ -46,22 +52,29 @@ def readable_timedelta(td: datetime.timedelta) -> str:
         return f"{days} days ago"
 
 
-def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
-    # ユーザの最高スコア順に並び替え. user ごとに uniqe にして最高スコアのみを取得
+def to_ranking(submitlog: pd.DataFrame) -> pd.DataFrame:
     ascending = Constants.SCORE_BETTERDIRECTION == "smaller"
 
+    # チームの列をつける
+    submitlog["teamid"] = submitlog["username"].apply(get_teamid)
+
+    # sort してチームごとに一番上取ってこれだけ残すことで順位表に変換
     ranking = (
-        df.sort_values("public_score", ascending=ascending).groupby("username").head(1)
+        submitlog.sort_values("public_score", ascending=ascending)
+        .groupby("teamid")
+        .head(1)
     )
 
     ranking["rank"] = range(1, len(ranking) + 1)
-    ranking["submitcount"] = ranking["username"].map(df["username"].value_counts())
+    ranking["submitcount"] = ranking["username"].map(
+        submitlog["username"].value_counts()
+    )
 
     # tz/tokyo に合わせる
     now = datetime.datetime.now() + datetime.timedelta(hours=9)
 
     ranking["lastsubmit"] = ranking["username"].map(
-        now - df.groupby("username")["post_date"].max()
+        now - submitlog.groupby("username")["post_date"].max()
     )
 
     ranking["lastsubmit"] = ranking["lastsubmit"].apply(readable_timedelta)
@@ -69,32 +82,39 @@ def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
     # アイコン用の列追加
     ranking["icon"] = ranking["username"].apply(name_to_icon_url)
 
+    # チーム名を取得
+    ranking["teamname"] = ranking["teamid"].apply(get_teamname)
+
     ranking = ranking.rename(columns={"public_score": "score"})
 
     ranking = ranking[
-        ["rank", "icon", "username", "score", "submitcount", "lastsubmit"]
+        ["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"]
     ]
 
     return ranking
 
 
-def get_score_progress(df: pd.DataFrame, username: str) -> pd.DataFrame:
-    user_df = df[df["username"] == username]
+def get_score_progress(submitlog: pd.DataFrame, teamname: str) -> pd.DataFrame:
+    submitlog["teamid"] = submitlog["username"].apply(get_teamid)
+    submitlog["teamname"] = submitlog["teamid"].apply(get_teamname)
+    team_subs = submitlog[submitlog["teamname"] == teamname]
 
-    user_df = user_df.sort_values("post_date")
+    team_subs = team_subs.sort_values("post_date")
 
     if Constants.SCORE_BETTERDIRECTION == "smaller":
-        user_df["progress"] = user_df["public_score"].cummin()
+        team_subs["progress"] = team_subs["public_score"].cummin()
     else:
-        user_df["progress"] = user_df["public_score"].cummax()
+        team_subs["progress"] = team_subs["public_score"].cummax()
 
-    user_df = user_df.set_index("post_date")
+    team_subs = team_subs.set_index("post_date")
 
-    return user_df
+    return team_subs
 
 
-def get_sns_message(df: pd.DataFrame, username: str) -> str:
-    rank = to_ranking(df)[username == df["username"]]
+def get_sns_message(submitlog: pd.DataFrame, teamname: str) -> str:
+    ranking = to_ranking(submitlog)
+
+    rank = ranking[ranking["teamname"] == teamname]
 
     if rank.empty:
         return "DacQ に参加している名無しのエンジニアです。"
@@ -131,7 +151,3 @@ def get_sns_message_by_rank(rank: int) -> str:
         )
 
     return message
-
-
-def name_to_icon_url(name: str) -> str:
-    return f"https://q.trap.jp/api/v3/public/icon/{name}"
