@@ -46,7 +46,6 @@ INSERT INTO submitlog (username, public_score, private_score) VALUES ('user1', 0
 INSERT INTO submitlog (username, public_score, private_score) VALUES ('user2', 0.6, 0.6);
 INSERT INTO submitlog (username, public_score, private_score) VALUES ('user2', 0.7, 0.7);
 INSERT INTO submitlog (username, public_score, private_score) VALUES ('user4', 0.8, 0.8);
-INSERT INTO submitlog (username, public_score, private_score) VALUES ('Unknown', 0.03, 0.8);
 
 
 INSERT INTO submitlog (post_date, username, public_score, private_score)
