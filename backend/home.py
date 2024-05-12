@@ -190,8 +190,6 @@ def select_team_setting(env):
         "Choose a image file (will be resized to 128x128)", type=["png", "jpg"]
     )
 
-    file_data = env["teamicon"]
-
     if uploaded_file is not None:
         st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
         # 128x128 にリサイズ
@@ -200,19 +198,15 @@ def select_team_setting(env):
         byte_io = io.BytesIO()
         image.save(byte_io, format="PNG")
         file_data = byte_io.getvalue()
+    else:
+        byte_io = io.BytesIO()
+        env["teamicon"].save(byte_io, format="PNG")
+        file_data = byte_io.getvalue()
 
     # チーム設定ボタン
     if st.button("Save"):
-        st.write("Save your team setting.")
-        st.write("New Team Name: " + team_name)
-        st.write("New Team Icon: ")
-        st.image(file_data, caption="New Icon")
-
         update_teamicon(env["teamid"], file_data)
         update_teamname(env["teamid"], team_name)
-
-        # load_env.clear_cache()
-
 
 def main():
     env = load_env()
@@ -296,13 +290,12 @@ def main():
         select_team_setting(env)
 
 
-INIT_DB = False
-
 def setup():
     st.session_state["has_run_setup"] = True
 
-    if INIT_DB:
-        setup_team(allow_duplicated=True)
+    setup_team(
+        skip=True,
+    )
 
 
 if __name__ == "__main__":
