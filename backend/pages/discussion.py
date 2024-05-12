@@ -21,6 +21,16 @@ import nbformat
 def read_nbimage(image: str) -> Image:
     return Image.open(io.BytesIO(base64.b64decode(image)))
 
+def render_html_out(html: str):
+    st.write(
+        f"""
+        <div style="overflow-x: auto;">
+        {html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 def render_notebook(notebook: bytes):
     notebook = nbformat.reads(notebook, as_version=4)
@@ -31,13 +41,19 @@ def render_notebook(notebook: bytes):
             for output in cell.outputs:
                 if output.output_type == "display_data":
                     st.image(read_nbimage(output.data["image/png"]))
+                    st.write(output.data.keys())
                 elif output.output_type == "execute_result":
-                    st.write(output.data["text/plain"])
+                    if "text/html" in output.data:
+                        render_html_out(output.data["text/html"])
+                    else:
+                        st.write(output.data["text/plain"])
                 elif output.output_type == "stream":
                     st.write(output.text)
                 elif output.output_type == "error":
                     st.error(output.ename)
                     st.error(output.evalue)
+                elif output.output_type == "dataframe":
+                    st.dataframe(output.data["text/plain"])
         elif cell.cell_type == "markdown":
             st.markdown(cell.source)
 
