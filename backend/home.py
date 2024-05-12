@@ -14,7 +14,7 @@ from utils import (
     load_env,
     name_to_icon_url,
 )
-from team import setup_team, get_members
+from team import setup_team, get_members, get_teamname, get_teamid
 
 
 def select_leaderboard(env):
@@ -44,10 +44,11 @@ def select_leaderboard(env):
 
 def select_score_log(env):
     submit = get_submit()
-    all_user = submit["username"].unique()
-    user = st.selectbox("Select user", all_user)
 
-    st.line_chart(get_score_progress(submit, user)["progress"])
+    all_team = submit["username"].apply(get_teamid).apply(get_teamname).unique()
+    team = st.selectbox("Select Team", all_team)
+
+    st.line_chart(get_score_progress(submit, team)["progress"])
 
 
 def select_rules(env):
@@ -202,7 +203,7 @@ def main():
 
     st.sidebar.link_button(
         "traQ に現在の順位を投稿する",
-        f"https://q.trap.jp/share-target?text={get_sns_message(get_submit(), env['username'])}",
+        f"https://q.trap.jp/share-target?text={get_sns_message(get_submit(), env['teamname'])}",
     )
 
     # 順位表
@@ -232,7 +233,6 @@ def setup():
 
 
 if __name__ == "__main__":
-
     if "has_run_setup" not in st.session_state:
         setup()
 
