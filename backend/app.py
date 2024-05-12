@@ -2,22 +2,37 @@ import streamlit as st
 import pandas as pd
 from streamlit_option_menu import option_menu
 
-
 from score import validate, score, ValidateState
 from db import get_submit, add_submit
 from const import Constants
-from utils import to_ranking, load_css, is_best_score, get_score_progress
+from utils import to_ranking, is_best_score, get_score_progress, get_sns_message
 from user import get_username
 
 
 def main():
     username = get_username()
 
-    st.title(f"📈 - DacQ - 📊 ‍💻 Welcome {username} !")
+    st.caption(f"Login as {username}")
 
-    st.markdown(
-        load_css("style.css"),
-        unsafe_allow_html=True,
+    st.sidebar.image(
+        "data/kaggle.png",
+        width=150,
+    )
+
+
+    st.sidebar.markdown(
+        f"""
+
+        ## Welcome {username} to DacQ! 📈📊
+
+        DacQ はデータ分析コンペプラットフォームです。
+
+        - LeaderBoard: 現在の順位表を表示します。
+        - Submit: 予測ファイルを提出できます。
+        - Rules / Data: コンペのルールやデータのダウンロードができます。
+        - Score Log: スコアの推移を表示します。
+        
+        """
     )
 
     selected = option_menu(
@@ -29,14 +44,12 @@ def main():
         orientation="horizontal",
     )
 
-    st.markdown(
-        """
-             <div class='title'> 現在の順位表 </div>
-            """,
-        unsafe_allow_html=True,
-    )
-
     submit = get_submit()
+
+    st.sidebar.link_button(
+        "traQ に現在の順位を投稿する",
+        f"https://q.trap.jp/share-target?text={get_sns_message(submit, username)}",
+    )
 
     # 順位表
     if selected == "LeaderBoard":
@@ -44,9 +57,11 @@ def main():
         st.write("Ranking")
         st.dataframe(
             ranking,
+            hide_index=True,
             column_config={
                 "rank": {},
                 "icon": st.column_config.ImageColumn(
+                    label="",
                     width=50,
                 ),
                 "username": {},
@@ -56,6 +71,7 @@ def main():
                 "submitcount": {},
                 "lastsubmit": {},
             },
+            use_container_width=True,
         )
 
     elif selected == "Submit":
@@ -92,15 +108,17 @@ def main():
     elif selected == "Score Log":
         all_user = submit["username"].unique()
         user = st.selectbox("Select user", all_user)
+        
         st.line_chart(get_score_progress(submit, user)["progress"])
 
 
 if __name__ == "__main__":
-
     st.set_page_config(
         page_title="DacQ",
         page_icon="📈",
         layout="wide",
     )
+
+    st.header("🦆📈 DacQ 🦆")
 
     main()

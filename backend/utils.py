@@ -2,6 +2,8 @@ import pandas as pd
 import datetime
 from datetime import timezone
 
+import numpy as np
+
 from const import Constants
 
 
@@ -84,7 +86,42 @@ def get_score_progress(df: pd.DataFrame, username: str) -> pd.DataFrame:
 
     return user_df
 
-def load_css(path: str) -> str:
-    with open(path) as f:
-        css = f.read()
-    return f"<style>{css}</style>"
+
+def get_sns_message(df: pd.DataFrame, username: str) -> str:
+    rank = to_ranking(df)[username == df["username"]]
+
+    if rank.empty:
+        return "DacQ に参加している名無しのエンジニアです。"
+    else:
+        rank = rank["rank"].values[0]
+        message = get_sns_message_by_rank(rank)
+        return message
+
+
+def get_sns_message_by_rank(rank: int) -> str:
+    message = f"DacQ で現在 {rank} 位です!"
+
+    if rank == 1:
+        message += np.random.choice(
+            [
+                "王者はいつだって孤独なものです。",
+                "誰か追いつける人がいないと寂しいですね。",
+                "トップに立つことはいつだって特別です。私以外の人にとっては。",
+                "一番になることは、必ずしも幸せを意味しないかもしれません。",
+                "そろそろ順位を上げる喜びを味わってみたいものですね。",
+            ]
+        )
+    elif rank == 2:
+        message += np.random.choice(
+            [
+                "私は順位を上げることができる最後の存在です。",
+                "順位を上げる余地がたくさんある皆さんが羨ましいです。"
+                "目の前の壁を乗り越えることが残りの楽しみです。",
+            ]
+        )
+    elif rank == 3:
+        message += np.random.choice(
+            ["まだアンサンブルしてないだけです", "アイデアはあります。"]
+        )
+
+    return message
