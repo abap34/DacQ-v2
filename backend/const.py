@@ -8,7 +8,7 @@ class Constants:
     PRED_COL: str = "pred"
     ID_COL: str = "id"
     DB_CONFIG = {
-        "host": os.getenv("NS_MARIADB_HOSTNAME", "localhost"),
+        "host": os.getenv("NS_MARIADB_HOSTNAME", "mariadb"),
         "port": int(os.getenv("NS_MARIADB_PORT", 3306)),
         "user": os.getenv("NS_MARIADB_USER", "root"),
         "password": os.getenv("NS_MARIADB_PASSWORD", "password"),
