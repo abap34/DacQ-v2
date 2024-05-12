@@ -10,7 +10,6 @@ from db import add_team, get_team
 import db
 
 
-
 # df が
 # 1. id が unique
 # 2. カラムが [id, user1, user2, user3] からなる
@@ -32,7 +31,7 @@ def validate_team(df: pd.DataFrame) -> bool:
 # db にチームの初期データを追加
 # デフォルトのチーム名は "team {i}"
 # デフォルトのアイコンは static/default_icon.png
-def setup_team(allow_duplicated: bool = False):
+def setup_team(skip: bool = True):
     team_df = pd.read_csv(Constants.TEAM_PATH)
     validate_team(team_df)
 
@@ -43,7 +42,8 @@ def setup_team(allow_duplicated: bool = False):
         team_id = team_df["id"][i]
         name = f"team {i}"
         icon_binaries = default_icon
-        add_team(team_id, name, icon_binaries, allow_duplicated)
+
+        add_team(team_id, name, icon_binaries, skip=skip)
 
 
 def get_teamid(username: str) -> int:
@@ -75,9 +75,9 @@ def get_teamname_from_username(usernames: str) -> str:
 
     return get_teamname(team_id)
 
+
 def get_teamname(team_id: int) -> str:
     return get_team(team_id)["name"]
-
 
 
 def get_members(team_id: int) -> List[str]:
