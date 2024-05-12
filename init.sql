@@ -24,6 +24,23 @@ CREATE TABLE team (
     icon MEDIUMBLOB NOT NULL
 );
 
+CREATE TABLE discussion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    username VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content MEDIUMBLOB NOT NULL
+);
+
+
+CREATE TABLE likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    username VARCHAR(255) NOT NULL,
+    discussion_id INT NOT NULL
+);
+
+
 -- ダミーの投稿データ
 INSERT INTO submitlog (username, public_score, private_score) VALUES ('user1', 0.5, 0.5);
 INSERT INTO submitlog (username, public_score, private_score) VALUES ('user2', 0.6, 0.6);
