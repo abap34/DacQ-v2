@@ -1,0 +1,1 @@
+docker-compose down && docker volume rm dacq-v2_mariadb_data
