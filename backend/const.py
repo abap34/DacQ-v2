@@ -1,6 +1,6 @@
 from typing import Literal
 import pymysql.cursors
-
+import os
 
 class Constants:
     LABEL_PATH: str = "static/label.csv"
@@ -8,11 +8,11 @@ class Constants:
     PRED_COL: str = "pred"
     ID_COL: str = "id"
     DB_CONFIG = {
-        "host": "mariadb",
-        "port": 3306,
-        "user": "root",
-        "password": "password",
-        "db": "app_db",
+        "host": os.getenv("NS_MARIADB_HOST", "localhost"),
+        "port": os.getenv("NS_MARIADB_PORT", 3306),
+        "user": os.getenv("NS_MARIADB_USER", "root"),
+        "password": os.getenv("NS_MARIADB_PASSWORD", "password"),
+        "db": os.getenv("NS_MARIADB_DATABASE", "app_db"),
         "charset": "utf8mb4",
         "cursorclass": pymysql.cursors.DictCursor,
     }
