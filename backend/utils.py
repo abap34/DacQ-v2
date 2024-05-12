@@ -4,8 +4,24 @@ from datetime import timezone
 
 import numpy as np
 
+from team import get_teamid, get_teamicon, get_teamname
+from user import get_username
+
 from const import Constants
 
+
+def load_env():
+    username = get_username()
+    teamname = get_teamname(username)
+    teamid = get_teamid(username)
+    teamicon = get_teamicon(teamid)
+
+    return {
+        "username": username,
+        "teamname": teamname,
+        "teamid": teamid,
+        "teamicon": teamicon,
+    }
 
 def readable_timedelta(td: datetime.timedelta) -> str:
     days = td // datetime.timedelta(days=1)
@@ -62,14 +78,6 @@ def to_ranking(df: pd.DataFrame) -> pd.DataFrame:
 
     return ranking
 
-
-def is_best_score(df: pd.DataFrame, score: float) -> bool:
-    if df.empty:
-        return True
-    if Constants.SCORE_BETTERDIRECTION == "smaller":
-        return score < df["public_score"].min()
-    else:
-        return score > df["public_score"].max()
 
 
 def get_score_progress(df: pd.DataFrame, username: str) -> pd.DataFrame:
