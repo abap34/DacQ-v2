@@ -9,7 +9,7 @@ import base64
 
 
 from score import validate, score, ValidateState
-from db import get_submit, add_submit, update_teamicon, update_teamname
+from db import init_db, get_submit, add_submit, update_teamicon, update_teamname
 from const import Constants
 from utils import (
     to_ranking,
@@ -105,7 +105,7 @@ def select_submit(env):
                     rain(
                         emoji="🎉",
                         animation_length=1,
-                        falling_speed=20,
+                        falling_speed=2,
                     )
 
                     st.success("Congratulations! You got the best score!")
@@ -293,6 +293,8 @@ def main():
 def setup():
     st.session_state["has_run_setup"] = True
 
+    init_db()
+    
     setup_team(
         skip=True,
     )

@@ -2,13 +2,72 @@ from dataclasses import dataclass
 import datetime
 import pymysql.cursors
 import pandas as pd
-from PIL import Image
-import io
 from typing import List
 
 import streamlit as st
 
 from const import Constants
+
+
+def init_db():
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {Constants.DB_CONFIG['db']}")
+
+            cursor.execute(f"USE {Constants.DB_CONFIG['db']}")
+
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS submitlog (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    username VARCHAR(255) NOT NULL,
+                    public_score DOUBLE NOT NULL,
+                    private_score DOUBLE NOT NULL
+                );
+
+                """
+            )
+
+            cursor.execute(
+                """
+                CREATE TABLE  IF NOT EXISTS team (
+                    id INT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    icon MEDIUMBLOB NOT NULL
+                );
+                """
+            )
+
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS discussion (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    username VARCHAR(255) NOT NULL,
+                    title VARCHAR(255) NOT NULL,
+                    content MEDIUMBLOB NOT NULL
+                );
+                """
+            )
+
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS likes (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    username VARCHAR(255) NOT NULL,
+                    discussion_id INT NOT NULL
+                );
+                """
+            )
+
+            connection.commit()
+
+    finally:
+        connection.close()
 
 
 def get_submit() -> pd.DataFrame:
@@ -21,7 +80,16 @@ def get_submit() -> pd.DataFrame:
             cursor.execute(sql)
             result = cursor.fetchall()
 
-            df = pd.DataFrame(result)
+            df = pd.DataFrame(
+                result,
+                columns=[
+                    "id",
+                    "post_date",
+                    "username",
+                    "public_score",
+                    "private_score",
+                ],
+            )
             return df
 
     finally:
@@ -86,8 +154,6 @@ def add_team(team_id: int, name: str, icon_binaries: bytes, skip: bool = False):
                 if not skip:
                     update_teamname(team_id, name)
                     update_teamicon(team_id, icon_binaries)
-
-                
 
             connection.commit()
     finally:
