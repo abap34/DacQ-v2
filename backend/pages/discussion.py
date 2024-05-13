@@ -145,7 +145,7 @@ def main():
     st.caption(f"Team: {env['teamname']}")
 
     st.sidebar.image(
-        "static/icon_svg.svg",
+        "static/icon.svg",
         width=180,
     )
 
