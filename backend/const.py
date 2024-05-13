@@ -12,7 +12,7 @@ class Constants:
         "port": int(os.getenv("NS_MARIADB_PORT", 3306)),
         "user": os.getenv("NS_MARIADB_USER", "root"),
         "password": os.getenv("NS_MARIADB_PASSWORD", "password"),
-        "db": "app_db",
+        "db": os.getenv("NS_MARIADB_DATABASE", "app_db"),
         "charset": "utf8mb4",
         "cursorclass": pymysql.cursors.DictCursor,
     }
