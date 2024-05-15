@@ -6,9 +6,11 @@ from typing import List
 import io
 
 from const import Constants
-from db import add_team, get_team
+from db import add_team, get_team, get_submit
 import db
 
+
+import streamlit as st
 
 # df が
 # 1. id が unique
@@ -46,6 +48,7 @@ def setup_team(skip: bool = True):
         add_team(team_id, name, icon_binaries, skip=skip)
 
 
+@st.cache_data
 def get_teamid(username: str) -> int:
     team_df = pd.read_csv(Constants.TEAM_PATH)
 
@@ -100,3 +103,9 @@ def get_team_submit(submitlog: pd.DataFrame, teamid: int) -> pd.DataFrame:
     team_subs = team_subs.sort_values("post_date")
 
     return team_subs
+
+@st.cache_data
+def get_all_team(submit: pd.DataFrame) -> List[str]:
+    all_team = submit["username"].apply(get_teamid).apply(get_teamname).unique()
+
+    return all_team
