@@ -71,8 +71,7 @@ def to_ranking(submitlog: pd.DataFrame) -> pd.DataFrame:
         submitlog["username"].value_counts()
     )
 
-    # tz/tokyo に合わせる
-    now = datetime.datetime.now() + datetime.timedelta(hours=9)
+    now = datetime.datetime.now() 
 
     ranking["lastsubmit"] = ranking["username"].map(
         now - submitlog.groupby("username")["post_date"].max()
