@@ -18,9 +18,17 @@ from utils import (
     load_env,
     name_to_icon_url,
     is_best_score,
+    load_rules,
 )
 
-from team import setup_team, get_members, get_teamname, get_teamid, get_team_submit
+from team import (
+    setup_team,
+    get_members,
+    get_teamname,
+    get_teamid,
+    get_team_submit,
+    get_all_team,
+)
 
 
 def to_imagebase64(image: Image) -> str:
@@ -62,7 +70,7 @@ def select_leaderboard(env):
 def select_score_log(env):
     submit = get_submit()
 
-    all_team = submit["username"].apply(get_teamid).apply(get_teamname).unique()
+    all_team = get_all_team(submit)
     team = st.selectbox("Select Team", all_team)
 
     st.line_chart(get_score_progress(submit, team)["progress"])
@@ -70,9 +78,7 @@ def select_score_log(env):
 
 def select_rules(env):
     st.write("Rules")
-    with open("static/rules.md", "r") as f:
-        rules = f.read()
-
+    rules = load_rules()
     st.markdown(rules)
 
 
@@ -208,14 +214,9 @@ def select_team_setting(env):
         update_teamicon(env["teamid"], file_data)
         update_teamname(env["teamid"], team_name)
 
+
 def main():
     env = load_env()
-
-    st.set_page_config(
-        page_title="DacQ",
-        page_icon="🦆",
-        layout="wide",
-    )
 
     st.markdown(
         "### 開催中のコンペ: ",
@@ -293,8 +294,14 @@ def main():
 def setup():
     st.session_state["has_run_setup"] = True
 
+    st.set_page_config(
+        page_title="DacQ",
+        page_icon="🦆",
+        layout="wide",
+    )
+
     init_db()
-    
+
     setup_team(
         skip=True,
     )

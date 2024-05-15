@@ -26,6 +26,14 @@ def load_env():
         "teamicon": teamicon,
     }
 
+@st.cache_data
+def load_rules():
+    with open("static/rules.md", "r") as f:
+        rules = f.read()
+
+    return rules
+
+
 
 def name_to_icon_url(name: str) -> str:
     return f"https://q.trap.jp/api/v3/public/icon/{name}"
