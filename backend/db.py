@@ -5,17 +5,18 @@ import pandas as pd
 from typing import List
 
 import streamlit as st
-
 from const import Constants
+from pymysqlpool.pool import Pool
 
+# コネクションプールの設定
+pool = Pool(**Constants.DB_CONFIG)
+pool.init()
 
 def init_db():
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {Constants.DB_CONFIG['db']}")
-
             cursor.execute(f"USE {Constants.DB_CONFIG['db']}")
 
             cursor.execute(
@@ -25,9 +26,9 @@ def init_db():
                     post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     username VARCHAR(255) NOT NULL,
                     public_score DOUBLE NOT NULL,
-                    private_score DOUBLE NOT NULL
+                    private_score DOUBLE NOT NULL,
+                    INDEX (username)
                 );
-
                 """
             )
 
@@ -36,7 +37,8 @@ def init_db():
                 CREATE TABLE  IF NOT EXISTS team (
                     id INT PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
-                    icon MEDIUMBLOB NOT NULL
+                    icon MEDIUMBLOB NOT NULL,
+                    INDEX (name)
                 );
                 """
             )
@@ -48,7 +50,8 @@ def init_db():
                     post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     username VARCHAR(255) NOT NULL,
                     title VARCHAR(255) NOT NULL,
-                    content MEDIUMBLOB NOT NULL
+                    content MEDIUMBLOB NOT NULL,
+                    INDEX (username)
                 );
                 """
             )
@@ -59,21 +62,19 @@ def init_db():
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     username VARCHAR(255) NOT NULL,
-                    discussion_id INT NOT NULL
+                    discussion_id INT NOT NULL,
+                    INDEX (username, discussion_id)
                 );
                 """
             )
 
             connection.commit()
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def get_submit() -> pd.DataFrame:
-    # データベースに接続
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "SELECT * FROM submitlog"
@@ -91,97 +92,82 @@ def get_submit() -> pd.DataFrame:
                 ],
             )
             return df
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def add_submit(username: str, public_score: float, private_score: float):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "INSERT INTO submitlog (username, public_score, private_score) VALUES (%s, %s, %s)"
             cursor.execute(sql, (username, public_score, private_score))
             connection.commit()
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def get_team(team_id: int) -> pd.DataFrame:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "SELECT * FROM team WHERE id = %s"
             cursor.execute(sql, team_id)
             result = cursor.fetchone()
-
             return result
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def get_teamicon(team_id: int) -> bytes:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "SELECT icon FROM team WHERE id = %s"
             cursor.execute(sql, team_id)
             result = cursor.fetchone()
-
             return result["icon"]
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def add_team(team_id: int, name: str, icon_binaries: bytes, skip: bool = False):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
-            # IDが存在するかチェックするためのSQL文
             cursor.execute("SELECT COUNT(*) FROM team WHERE id = %s", (team_id,))
             if cursor.fetchone()["COUNT(*)"] == 0:
-                # IDが存在しない場合は新規追加
                 sql = "INSERT INTO team (id, name, icon) VALUES (%s, %s, %s)"
                 cursor.execute(sql, (team_id, name, icon_binaries))
             else:
-                # ID が存在するならスキップ. ただしスキップフラグが立っていない場合は上書き
                 if not skip:
                     update_teamname(team_id, name)
                     update_teamicon(team_id, icon_binaries)
-
             connection.commit()
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def update_teamname(team_id: int, name: str):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "UPDATE team SET name = %s WHERE id = %s"
             cursor.execute(sql, (name, team_id))
             connection.commit()
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def update_teamicon(team_id: int, icon_binaries: bytes):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "UPDATE team SET icon = %s WHERE id = %s"
             cursor.execute(sql, (icon_binaries, team_id))
             connection.commit()
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 @dataclass
@@ -193,11 +179,8 @@ class Discussion:
     username: str
 
 
-# Discussionの列を取得
-# 重いのでこれは cache する
 def get_discussions() -> List[Discussion]:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "SELECT * FROM discussion"
@@ -215,47 +198,36 @@ def get_discussions() -> List[Discussion]:
                         username=row["username"],
                     )
                 )
-
             return discussions
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def add_discussion(title: str, content: bytes, username: str):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
-            sql = (
-                "INSERT INTO discussion (title, content, username) VALUES (%s, %s, %s)"
-            )
+            sql = "INSERT INTO discussion (title, content, username) VALUES (%s, %s, %s)"
             cursor.execute(sql, (title, content, username))
             connection.commit()
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def get_favoritecount(discussion_id: int) -> int:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             sql = "SELECT COUNT(*) FROM likes WHERE discussion_id = %s"
             cursor.execute(sql, discussion_id)
             result = cursor.fetchone()
-
             return result["COUNT(*)"]
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
-# いいねを追加. もし既にいいねしていたらそれを削除
 def put_favorite(username: str, discussion_id: int):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
             if is_favorite(username, discussion_id):
@@ -264,23 +236,17 @@ def put_favorite(username: str, discussion_id: int):
                 sql = "INSERT INTO likes (username, discussion_id) VALUES (%s, %s)"
             cursor.execute(sql, (username, discussion_id))
             connection.commit()
-
     finally:
-        connection.close()
+        pool.release(connection)
 
 
 def is_favorite(username: str, discussion_id: int) -> bool:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
-
+    connection = pool.get_conn()
     try:
         with connection.cursor() as cursor:
-            sql = (
-                "SELECT COUNT(*) FROM likes WHERE username = %s AND discussion_id = %s"
-            )
+            sql = "SELECT COUNT(*) FROM likes WHERE username = %s AND discussion_id = %s"
             cursor.execute(sql, (username, discussion_id))
             result = cursor.fetchone()
-
             return result["COUNT(*)"] > 0
-
     finally:
-        connection.close()
+        pool.release(connection)
