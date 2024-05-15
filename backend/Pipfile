@@ -52,7 +52,6 @@ urllib3 = "==2.2.1"
 streamlit-option-menu = "*"
 nbconvert = "*"
 streamlit-extras = "*"
-pymysql-pooling = "*"
 
 [dev-packages]
 
