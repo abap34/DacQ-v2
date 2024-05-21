@@ -7,7 +7,6 @@ import io
 import numpy as np
 import base64
 
-
 from score import validate, score, ValidateState
 from db import init_db, get_submit, add_submit, update_teamicon, update_teamname
 from const import Constants
@@ -24,8 +23,6 @@ from utils import (
 from team import (
     setup_team,
     get_members,
-    get_teamname,
-    get_teamid,
     get_team_submit,
     get_all_team,
 )
@@ -215,9 +212,7 @@ def select_team_setting(env):
         update_teamname(env["teamid"], team_name)
 
 
-def main():
-    env = load_env()
-
+def main(env):
     st.markdown(
         "### 開催中のコンペ: ",
     )
@@ -306,9 +301,12 @@ def setup():
         skip=True,
     )
 
+    st.session_state["env"] = load_env()
+
+
 
 if __name__ == "__main__":
     if "has_run_setup" not in st.session_state:
         setup()
 
-    main()
+    main(st.session_state["env"])

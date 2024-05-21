@@ -129,9 +129,7 @@ def select_write(env):
     )
 
 
-def main():
-    env = load_env()
-
+def main(env):
     st.header(
         """
         Discussion 🔈
@@ -175,5 +173,14 @@ def main():
         select_write(env)
 
 
+def setup():
+    st.session_state["has_run_setup"] = True
+    st.session_state["env"] = load_env()
+    
+
 if __name__ == "__main__":
-    main()
+    if "has_run_setup" not in st.session_state:
+        setup()
+
+    main(st.session_state["env"])
+    
