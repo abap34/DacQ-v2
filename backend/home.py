@@ -6,6 +6,8 @@ from PIL import Image
 import io
 import numpy as np
 import base64
+import yaml
+import requests
 
 from score import validate, score, ValidateState
 from db import init_db, get_submit, add_submit, update_teamicon, update_teamname
@@ -212,6 +214,29 @@ def select_team_setting(env):
         update_teamname(env["teamid"], team_name)
 
 
+@st.cache_data
+def get_url(url):
+    return requests.get(url)
+
+
+
+def data(env):
+    datasets = env["config"]["datasets"]
+
+    st.write("## Data")
+
+    for name, url in datasets.items():
+        data = get_url(url)
+        filename = name + ".csv"
+        st.write(f"### {filename} ({len(data.content)} bytes)")
+        st.download_button(
+            label="Download",
+            data=data.content,
+            file_name=name + ".csv",
+            mime="text/csv",
+        )
+
+
 def main(env):
     st.markdown(
         "### 開催中のコンペ: ",
@@ -219,7 +244,7 @@ def main(env):
 
     st.header(
         """
-        # コンペティション ① 🦆📊
+        # 機械学習講習会 2024 記念 部内コンペ🦆📊
 
         """,
         anchor="top",
@@ -228,7 +253,7 @@ def main(env):
 
     selected = option_menu(
         None,
-        ["LeaderBoard", "Submit", "Rules", "Score Log", "Team Setting"],
+        ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"],
         icons=["house", "cloud-upload", "list-task", "file-earmark-text", "people"],
         menu_icon="cast",
         default_index=0,
@@ -285,10 +310,12 @@ def main(env):
     elif selected == "Team Setting":
         select_team_setting(env)
 
+    elif selected == "Data":
+        data(env)
+    
+
 
 def setup():
-    st.session_state["has_run_setup"] = True
-
     st.set_page_config(
         page_title="DacQ",
         page_icon="🦆",
@@ -303,6 +330,13 @@ def setup():
 
     st.session_state["env"] = load_env()
 
+    # static/config.yaml を読む
+    with open("static/config.yaml") as f:
+        config = yaml.safe_load(f)
+
+    st.session_state["env"]["config"] = config
+
+    st.session_state["has_run_setup"] = True
 
 
 if __name__ == "__main__":
