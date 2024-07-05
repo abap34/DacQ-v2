@@ -72,7 +72,10 @@ def readable_timedelta(td: datetime.timedelta) -> str:
 
 
 def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataFrame:
-    assert phase in [Phase.public, Phase.private]
+    if phase not in [Phase.public, Phase.private]:
+        return pd.DataFrame(columns=["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"])
+
+
     sort_col = "public_score" if phase == Phase.public else "private_score"
 
     ascending = Constants.SCORE_BETTERDIRECTION == "smaller"
