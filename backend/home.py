@@ -8,6 +8,7 @@ import numpy as np
 import base64
 import yaml
 import requests
+from utils import Phase
 
 from score import validate, score, ValidateState
 from db import init_db, get_submit, add_submit, update_teamicon, update_teamname
@@ -37,10 +38,26 @@ def to_imagebase64(image: Image) -> str:
         "utf-8"
     )
 
+def get_current_phase() -> Phase:
+    now = pd.Timestamp.now()
+    if now < Constants.DATE["public_start"]:
+        return Phase.before_public
+    elif now < Constants.DATE["public_end"]:
+        return Phase.public
+    elif now < Constants.DATE["private_start"]:
+        return Phase.between
+    elif now < Constants.DATE["private_end"]:
+        return Phase.private
+    else:
+        return Phase.after_private
+    
+
 
 def select_leaderboard(env):
+    current_phase = get_current_phase()
+
     submit = get_submit()
-    ranking = to_ranking(submit)
+    ranking = to_ranking(submit, phase=current_phase)
 
     # ranking の icon を base64 に変換
     ranking["icon"] = ranking["icon"].apply(to_imagebase64)
@@ -96,11 +113,23 @@ def select_submit(env):
                 )
             else:
                 label = pd.read_csv(Constants.LABEL_PATH)
-                score_value = score(
-                    label[Constants.LABEL_COL].values, df[Constants.PRED_COL].values
+                public_private_setting = pd.read_csv(Constants.PUBLIC_PRIVATE_SETTING)
+                public_mask = public_private_setting["setting"] == "public"
+                private_mask = public_private_setting["setting"] == "private"
+                assert np.logical_or(public_mask, private_mask).all()
+                
+                public_score = score(
+                    label[Constants.LABEL_COL].values[public_mask],
+                    df[Constants.PRED_COL].values[public_mask],
                 )
 
-                is_best, prev_best = is_best_score(submit, username, score_value)
+                private_score = score(
+                    label[Constants.LABEL_COL].values[private_mask],
+                    df[Constants.PRED_COL].values[private_mask],
+                )
+
+
+                is_best, prev_best = is_best_score(submit, username, public_score)
 
                 # ベストスコアかどうかを判定
                 if not is_best:
@@ -118,21 +147,21 @@ def select_submit(env):
                     if np.isnan(prev_best):
                         st.metric(
                             label="Your First Score! Keep it up! 🦆",
-                            value=f"{score_value:.5f}",
+                            value=f"{public_score:.5f}",
                         )
                     else:
                         st.metric(
                             label="Best Score Updated ! ⤴️",
-                            value=f"{score_value:.5f}",
-                            delta=f"{score_value - prev_best:.5f}",
+                            value=f"{public_score:.5f}",
+                            delta=f"{public_score - prev_best:.5f}",
                         )
 
                     st.link_button(
                         "スコア更新を traQ に共有する!",
-                        f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{score_value:.5f}です :nityaa_harsh:",
+                        f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{public_score:.5f}です :nityaa_harsh:",
                     )
 
-                add_submit(env["username"], score_value, score_value)
+                add_submit(env["username"], public_score, private_score)
 
     st.button(
         "Submit !",
@@ -215,7 +244,7 @@ def select_team_setting(env):
 
 
 def data(env):
-    datasets = env["config"]["datasets"]
+    datasets = Constants.DATASETS
 
     st.write("## Data")
 
@@ -323,13 +352,6 @@ def setup():
     )
 
     st.session_state["env"] = load_env()
-
-    # static/config.yaml を読む
-    with open("static/config.yaml") as f:
-        config = yaml.safe_load(f)
-
-    st.session_state["env"]["config"] = config
-
     st.session_state["has_run_setup"] = True
 
 
