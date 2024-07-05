@@ -31,6 +31,8 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+    environment:
+      DEV: "true"
 
 volumes:
   mariadb_data:
