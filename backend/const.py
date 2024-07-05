@@ -1,7 +1,9 @@
-from typing import Literal
-import pymysql.cursors
+import datetime
 import os
-import datetime 
+from typing import Literal
+
+import pymysql.cursors
+
 
 class Constants:
     LABEL_PATH: str = "static/label.csv"
@@ -17,8 +19,6 @@ class Constants:
         "charset": "utf8mb4",
         "cursorclass": pymysql.cursors.DictCursor,
     }
-
-
 
     SCORE_BETTERDIRECTION: Literal["smaller", "larger"] = "smaller"
 

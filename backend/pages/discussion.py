@@ -1,22 +1,19 @@
-import streamlit as st
-from utils import load_env
-from streamlit_option_menu import option_menu
-
-from typing import Literal
-
-from PIL import Image
 import base64
 import io
-
-from db import (
-    get_discussions,
-    add_discussion,
-    put_favorite,
-    get_favoritecount,
-    is_favorite,
-)
+from typing import Literal
 
 import nbformat
+import streamlit as st
+from db import (
+    add_discussion,
+    get_discussions,
+    get_favoritecount,
+    is_favorite,
+    put_favorite,
+)
+from PIL import Image
+from streamlit_option_menu import option_menu
+from utils import load_env
 
 
 # base64 encode された画像を読む
@@ -176,11 +173,10 @@ def main(env):
 def setup():
     st.session_state["has_run_setup"] = True
     st.session_state["env"] = load_env()
-    
+
 
 if __name__ == "__main__":
     if "has_run_setup" not in st.session_state:
         setup()
 
     main(st.session_state["env"])
-    

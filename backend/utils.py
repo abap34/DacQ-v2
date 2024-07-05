@@ -1,18 +1,15 @@
-import pandas as pd
 import datetime
+from dataclasses import dataclass
 from datetime import timezone
 from typing import Tuple
 
 import numpy as np
-
-from team import get_teamid, get_teamicon, get_teamname
+import pandas as pd
+import streamlit as st
+from const import Constants
+from team import get_teamicon, get_teamid, get_teamname
 from user import get_username
 
-from const import Constants
-
-import streamlit as st
-
-from dataclasses import dataclass
 
 # enum
 class Phase:
@@ -36,13 +33,13 @@ def load_env():
         "teamicon": teamicon,
     }
 
+
 @st.cache_data
 def load_rules():
     with open("static/rules.md", "r") as f:
         rules = f.read()
 
     return rules
-
 
 
 def name_to_icon_url(name: str) -> str:
@@ -73,8 +70,9 @@ def readable_timedelta(td: datetime.timedelta) -> str:
 
 def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataFrame:
     if phase not in [Phase.public, Phase.private]:
-        return pd.DataFrame(columns=["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"])
-
+        return pd.DataFrame(
+            columns=["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"]
+        )
 
     sort_col = "public_score" if phase == Phase.public else "private_score"
 
@@ -85,9 +83,7 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
 
     # sort してチームごとに一番上取ってこれだけ残すことで順位表に変換
     ranking = (
-        submitlog.sort_values(sort_col, ascending=ascending)
-        .groupby("teamid")
-        .head(1)
+        submitlog.sort_values(sort_col, ascending=ascending).groupby("teamid").head(1)
     )
 
     ranking["rank"] = range(1, len(ranking) + 1)
@@ -95,7 +91,7 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
         submitlog["username"].value_counts()
     )
 
-    now = datetime.datetime.now() 
+    now = datetime.datetime.now()
 
     ranking["lastsubmit"] = ranking["username"].map(
         now - submitlog.groupby("username")["post_date"].max()
@@ -105,7 +101,7 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
 
     # アイコン用の列追加
     ranking["icon"] = ranking["teamid"].apply(get_teamicon)
-    
+
     ranking["teamname"] = ranking["teamid"].apply(get_teamname)
 
     ranking = ranking.rename(columns={sort_col: "score"})
@@ -176,17 +172,15 @@ def get_sns_message_by_rank(rank: int) -> str:
     return message
 
 
-def is_best_score(submitlog: pd.DataFrame, username: str, score: float) -> Tuple[bool, float]:
+def is_best_score(
+    submitlog: pd.DataFrame, username: str, score: float
+) -> Tuple[bool, float]:
     team_subs = submitlog[submitlog["username"] == username]
 
     if team_subs.empty:
         return True, np.nan
-    
+
     if Constants.SCORE_BETTERDIRECTION == "smaller":
         return score < team_subs["public_score"].min(), team_subs["public_score"].min()
     else:
         return score > team_subs["public_score"].max(), team_subs["public_score"].max()
-    
-
-
-    

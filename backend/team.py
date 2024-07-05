@@ -1,16 +1,14 @@
-import pandas as pd
-from PIL import Image
-from typing import List
-
 # base64
 import io
+from typing import List
 
-from const import Constants
-from db import add_team, get_team, get_submit
 import db
-
-
+import pandas as pd
 import streamlit as st
+from const import Constants
+from db import add_team, get_submit, get_team
+from PIL import Image
+
 
 # df が
 # 1. id が unique
@@ -103,6 +101,7 @@ def get_team_submit(submitlog: pd.DataFrame, teamid: int) -> pd.DataFrame:
     team_subs = team_subs.sort_values("post_date")
 
     return team_subs
+
 
 @st.cache_data
 def get_all_team(submit: pd.DataFrame) -> List[str]:

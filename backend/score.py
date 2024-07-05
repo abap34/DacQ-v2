@@ -1,8 +1,8 @@
-from sklearn.metrics import mean_squared_error
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from const import Constants
+from sklearn.metrics import mean_squared_error
+
 
 class ValidateState:
     VALID = 0
@@ -27,23 +27,21 @@ class ValidateState:
 
 def validate(df: pd.DataFrame) -> bool:
     label = pd.read_csv(Constants.LABEL_PATH)
-    
+
     if df.shape != label.shape:
         return ValidateState.SHAPE_ERROR
 
     if (not Constants.ID_COL in df.columns) or (not Constants.PRED_COL in df.columns):
-        return ValidateState.INVALID_COLUMN 
-    
+        return ValidateState.INVALID_COLUMN
+
     if len(df[Constants.ID_COL].unique()) != len(df):
         return ValidateState.DUPLICATE_ID
-    
+
     if df[Constants.PRED_COL].isnull().sum() > 0:
         return ValidateState.NAN_PRED
-    
-    return ValidateState.VALID
 
+    return ValidateState.VALID
 
 
 def score(y_true: np.ndarray, y_pred: np.ndarray) -> np.float64:
     return mean_squared_error(y_true, y_pred)
-
