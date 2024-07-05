@@ -22,3 +22,4 @@ class Constants:
     SCORE_BETTERDIRECTION: Literal["smaller", "larger"] = "smaller"
 
     TEAM_PATH = "static/team_setting.csv"
+    PUBLIC_PRIVATE_SETTING = "static/public_private_setting.csv"

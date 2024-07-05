@@ -96,11 +96,23 @@ def select_submit(env):
                 )
             else:
                 label = pd.read_csv(Constants.LABEL_PATH)
-                score_value = score(
-                    label[Constants.LABEL_COL].values, df[Constants.PRED_COL].values
+                public_private_setting = pd.read_csv(Constants.PUBLIC_PRIVATE_SETTING)
+                public_mask = public_private_setting["setting"] == "public"
+                private_mas = public_private_setting["setting"] == "private"
+                assert np.logical_or(public_mask, private_mas).all()
+                
+                public_score = score(
+                    label[Constants.LABEL_COL].values[public_mask],
+                    df[Constants.PRED_COL].values[public_mask],
                 )
 
-                is_best, prev_best = is_best_score(submit, username, score_value)
+                private_score = score(
+                    label[Constants.LABEL_COL].values[private_mas],
+                    df[Constants.PRED_COL].values[private_mas],
+                )
+
+
+                is_best, prev_best = is_best_score(submit, username, public_score)
 
                 # ベストスコアかどうかを判定
                 if not is_best:
@@ -118,21 +130,21 @@ def select_submit(env):
                     if np.isnan(prev_best):
                         st.metric(
                             label="Your First Score! Keep it up! 🦆",
-                            value=f"{score_value:.5f}",
+                            value=f"{public_score:.5f}",
                         )
                     else:
                         st.metric(
                             label="Best Score Updated ! ⤴️",
-                            value=f"{score_value:.5f}",
-                            delta=f"{score_value - prev_best:.5f}",
+                            value=f"{public_score:.5f}",
+                            delta=f"{public_score - prev_best:.5f}",
                         )
 
                     st.link_button(
                         "スコア更新を traQ に共有する!",
-                        f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{score_value:.5f}です :nityaa_harsh:",
+                        f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{public_score:.5f}です :nityaa_harsh:",
                     )
 
-                add_submit(env["username"], score_value, score_value)
+                add_submit(env["username"], public_score, private_score)
 
     st.button(
         "Submit !",
