@@ -8,6 +8,7 @@ import numpy as np
 import base64
 import yaml
 import requests
+from utils import Phase
 
 from score import validate, score, ValidateState
 from db import init_db, get_submit, add_submit, update_teamicon, update_teamname
@@ -37,10 +38,26 @@ def to_imagebase64(image: Image) -> str:
         "utf-8"
     )
 
+def get_current_phase() -> Phase:
+    now = pd.Timestamp.now()
+    if now < Constants.DATE["public_start"]:
+        return Phase.before_public
+    elif now < Constants.DATE["public_end"]:
+        return Phase.public
+    elif now < Constants.DATE["private_start"]:
+        return Phase.between
+    elif now < Constants.DATE["private_end"]:
+        return Phase.private
+    else:
+        return Phase.after_private
+    
+
 
 def select_leaderboard(env):
+    current_phase = get_current_phase()
+
     submit = get_submit()
-    ranking = to_ranking(submit)
+    ranking = to_ranking(submit, phase=current_phase)
 
     # ranking の icon を base64 に変換
     ranking["icon"] = ranking["icon"].apply(to_imagebase64)
