@@ -214,26 +214,20 @@ def select_team_setting(env):
         update_teamname(env["teamid"], team_name)
 
 
-@st.cache_data
-def get_url(url):
-    return requests.get(url)
-
-
-
 def data(env):
     datasets = env["config"]["datasets"]
 
     st.write("## Data")
 
     for name, url in datasets.items():
-        data = get_url(url)
-        filename = name + ".csv"
-        st.write(f"### {filename} ({len(data.content)} bytes)")
-        st.download_button(
-            label="Download",
-            data=data.content,
-            file_name=name + ".csv",
-            mime="text/csv",
+        # url に飛ぶ
+        st.write(f"""
+
+        ### {name}
+
+        [Download {name}]({url})
+
+        """
         )
 
 
