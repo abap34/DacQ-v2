@@ -1,33 +1,27 @@
-import streamlit as st
-import pandas as pd
-from streamlit_option_menu import option_menu
-from streamlit_extras.let_it_rain import rain
-from PIL import Image
-import io
-import numpy as np
 import base64
-import yaml
-import requests
-from utils import Phase
+import io
 
-from score import validate, score, ValidateState
-from db import init_db, get_submit, add_submit, update_teamicon, update_teamname
+import numpy as np
+import pandas as pd
+import requests
+import streamlit as st
+import yaml
 from const import Constants
+from db import add_submit, get_submit, init_db, update_teamicon, update_teamname
+from PIL import Image
+from score import ValidateState, score, validate
+from streamlit_extras.let_it_rain import rain
+from streamlit_option_menu import option_menu
+from team import get_all_team, get_members, get_team_submit, setup_team
 from utils import (
-    to_ranking,
+    Phase,
     get_score_progress,
     get_sns_message,
-    load_env,
-    name_to_icon_url,
     is_best_score,
+    load_env,
     load_rules,
-)
-
-from team import (
-    setup_team,
-    get_members,
-    get_team_submit,
-    get_all_team,
+    name_to_icon_url,
+    to_ranking,
 )
 
 
@@ -37,6 +31,7 @@ def to_imagebase64(image: Image) -> str:
     return "data:image/png;base64," + base64.b64encode(byte_io.getvalue()).decode(
         "utf-8"
     )
+
 
 def get_current_phase() -> Phase:
     now = pd.Timestamp.now()
@@ -50,7 +45,6 @@ def get_current_phase() -> Phase:
         return Phase.private
     else:
         return Phase.after_private
-    
 
 
 def select_leaderboard(env):
@@ -117,7 +111,7 @@ def select_submit(env):
                 public_mask = public_private_setting["setting"] == "public"
                 private_mask = public_private_setting["setting"] == "private"
                 assert np.logical_or(public_mask, private_mask).all()
-                
+
                 public_score = score(
                     label[Constants.LABEL_COL].values[public_mask],
                     df[Constants.PRED_COL].values[public_mask],
@@ -127,7 +121,6 @@ def select_submit(env):
                     label[Constants.LABEL_COL].values[private_mask],
                     df[Constants.PRED_COL].values[private_mask],
                 )
-
 
                 is_best, prev_best = is_best_score(submit, username, public_score)
 
@@ -250,7 +243,8 @@ def data(env):
 
     for name, url in datasets.items():
         # url に飛ぶ
-        st.write(f"""
+        st.write(
+            f"""
 
         ### {name}
 
@@ -335,7 +329,6 @@ def main(env):
 
     elif selected == "Data":
         data(env)
-    
 
 
 def setup():
