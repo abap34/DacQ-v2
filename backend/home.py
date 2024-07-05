@@ -227,7 +227,7 @@ def select_team_setting(env):
 
 
 def data(env):
-    datasets = env["config"]["datasets"]
+    datasets = Constants.DATASETS
 
     st.write("## Data")
 
@@ -335,13 +335,6 @@ def setup():
     )
 
     st.session_state["env"] = load_env()
-
-    # static/config.yaml を読む
-    with open("static/config.yaml") as f:
-        config = yaml.safe_load(f)
-
-    st.session_state["env"]["config"] = config
-
     st.session_state["has_run_setup"] = True
 
 

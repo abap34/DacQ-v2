@@ -1,6 +1,7 @@
 from typing import Literal
 import pymysql.cursors
 import os
+import datetime 
 
 class Constants:
     LABEL_PATH: str = "static/label.csv"
@@ -23,3 +24,15 @@ class Constants:
 
     TEAM_PATH = "static/team_setting.csv"
     PUBLIC_PRIVATE_SETTING = "static/public_private_setting.csv"
+
+    DATASETS = {
+        "train": "https://abap34.com/trap_ml_lecture/train.csv",
+        "test": "https://abap34.com/trap_ml_lecture/test.csv",
+    }
+
+    DATE = {
+        "public_start": datetime.datetime(2024, 7, 20, 19, 30, 0),
+        "public_end": datetime.datetime(2024, 7, 27, 0, 0, 0),
+        "private_start": datetime.datetime(2024, 7, 27, 17, 45, 0),
+        "private_end": datetime.datetime(2024, 9, 7, 0, 0, 0),
+    }
