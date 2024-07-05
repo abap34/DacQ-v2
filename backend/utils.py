@@ -12,6 +12,16 @@ from const import Constants
 
 import streamlit as st
 
+from dataclasses import dataclass
+
+# enum
+class Phase:
+    before_public = 0
+    public = 1
+    between = 2
+    private = 3
+    after_private = 4
+
 
 def load_env():
     username = get_username()
@@ -61,7 +71,10 @@ def readable_timedelta(td: datetime.timedelta) -> str:
         return f"{days} days ago"
 
 
-def to_ranking(submitlog: pd.DataFrame) -> pd.DataFrame:
+def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataFrame:
+    assert phase in [Phase.public, Phase.private]
+    sort_col = "public_score" if phase == Phase.public else "private_score"
+
     ascending = Constants.SCORE_BETTERDIRECTION == "smaller"
 
     # チームの列をつける
@@ -69,7 +82,7 @@ def to_ranking(submitlog: pd.DataFrame) -> pd.DataFrame:
 
     # sort してチームごとに一番上取ってこれだけ残すことで順位表に変換
     ranking = (
-        submitlog.sort_values("public_score", ascending=ascending)
+        submitlog.sort_values(sort_col, ascending=ascending)
         .groupby("teamid")
         .head(1)
     )
@@ -92,7 +105,7 @@ def to_ranking(submitlog: pd.DataFrame) -> pd.DataFrame:
     
     ranking["teamname"] = ranking["teamid"].apply(get_teamname)
 
-    ranking = ranking.rename(columns={"public_score": "score"})
+    ranking = ranking.rename(columns={sort_col: "score"})
 
     ranking = ranking[
         ["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"]
