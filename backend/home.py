@@ -115,8 +115,8 @@ def select_submit(env):
                 label = pd.read_csv(Constants.LABEL_PATH)
                 public_private_setting = pd.read_csv(Constants.PUBLIC_PRIVATE_SETTING)
                 public_mask = public_private_setting["setting"] == "public"
-                private_mas = public_private_setting["setting"] == "private"
-                assert np.logical_or(public_mask, private_mas).all()
+                private_mask = public_private_setting["setting"] == "private"
+                assert np.logical_or(public_mask, private_mask).all()
                 
                 public_score = score(
                     label[Constants.LABEL_COL].values[public_mask],
@@ -124,8 +124,8 @@ def select_submit(env):
                 )
 
                 private_score = score(
-                    label[Constants.LABEL_COL].values[private_mas],
-                    df[Constants.PRED_COL].values[private_mas],
+                    label[Constants.LABEL_COL].values[private_mask],
+                    df[Constants.PRED_COL].values[private_mask],
                 )
 
 
