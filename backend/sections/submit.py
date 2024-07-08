@@ -12,15 +12,15 @@ from score import public_and_private_score
 
 
 def select_submit(env):
+    if get_current_phase() != Phase.public:
+        st.warning("Sorry, Submission period is over!")
+        return
+    
+
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     submit = get_submit()
 
     def _add_submit(username):
-        # public の期間が終わっていたら拒否する
-        if get_current_phase() != Phase.public:
-            st.warning("Sorry, Submission period is over!")
-            return
-
         if uploaded_file is not None:
             df = pd.read_csv(uploaded_file)
             validate_state = validate(df)
