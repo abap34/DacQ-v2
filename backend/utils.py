@@ -1,4 +1,6 @@
+import base64
 import datetime
+import io
 from dataclasses import dataclass
 from datetime import timezone
 from typing import Tuple
@@ -6,18 +8,33 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 import streamlit as st
+from PIL import Image
+
 from const import Constants
 from team import get_teamicon, get_teamid, get_teamname
 from user import get_username
 
 
-# enum
 class Phase:
     before_public = 0
     public = 1
     between = 2
     private = 3
     after_private = 4
+
+
+def get_current_phase() -> Phase:
+    now = pd.Timestamp.now()
+    if now < Constants.DATE["public_start"]:
+        return Phase.before_public
+    elif now < Constants.DATE["public_end"]:
+        return Phase.public
+    elif now < Constants.DATE["private_start"]:
+        return Phase.between
+    elif now < Constants.DATE["private_end"]:
+        return Phase.private
+    else:
+        return Phase.after_private
 
 
 def load_env():
@@ -66,6 +83,14 @@ def readable_timedelta(td: datetime.timedelta) -> str:
     else:
 
         return f"{days} days ago"
+
+
+def to_imagebase64(image: Image) -> str:
+    byte_io = io.BytesIO()
+    image.save(byte_io, format="PNG")
+    return "data:image/png;base64," + base64.b64encode(byte_io.getvalue()).decode(
+        "utf-8"
+    )
 
 
 def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataFrame:
