@@ -108,7 +108,11 @@ def select_read(env):
         )
 
         with st.expander("中身を見る"):
-            render_notebook(discussion.content)
+            try:
+                render_notebook(discussion.content)
+            except Exception as e:
+                st.error(f"ノートブックの表示に失敗しました: {e}")
+            
 
         st.markdown("---")
 
