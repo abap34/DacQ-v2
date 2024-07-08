@@ -1,9 +1,23 @@
 import streamlit as st
-from utils import get_current_phase, to_imagebase64, to_ranking
+from utils import get_current_phase, to_imagebase64, to_ranking, Phase
 from db import get_submit
+
 
 def select_leaderboard(env):
     current_phase = get_current_phase()
+    if current_phase == Phase.before_public:
+        st.write("## Competition has not started yet.")
+        return
+    
+    if current_phase == Phase.after_public:
+        st.write("## Public phase has ended. Please wait for the results.")
+        return
+    
+    if current_phase == Phase.after_private:
+        st.write("## Competition has ended.")
+        return
+
+
     submit = get_submit()
     ranking = to_ranking(submit, phase=current_phase)
 
