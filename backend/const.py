@@ -31,7 +31,7 @@ class Constants:
     }
 
     DATE = {
-        "public_start": datetime.datetime(2024, 7, 10, 19, 30, 0),
+        "public_start": datetime.datetime(2024, 7, 10, 18, 0, 0),
         "public_end": datetime.datetime(2024, 7, 17, 0, 0, 0),
         "private_start": datetime.datetime(2024, 7, 27, 17, 45, 0),
         "private_end": datetime.datetime(2024, 9, 7, 0, 0, 0),
