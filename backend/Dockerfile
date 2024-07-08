@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["streamlit", "run", "home.py", "--server.port=5001"]
+CMD ["streamlit", "run", "home.py", "--server.port=5001", "--server.headless=true"]
