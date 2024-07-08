@@ -161,7 +161,7 @@ def get_sns_message(submitlog: pd.DataFrame, teamname: str) -> str:
     rank = ranking[ranking["teamname"] == teamname]
 
     if rank.empty:
-        return "DacQ に参加している名無しのエンジニアです。"
+        return f"DacQ に {teamname} として参加しています。あと {np.random.randint(1, 100)} 分以内に最初のサブミットをするつもりです。できなかったら本館前に埋めてもらってもいいですよ！"
     else:
         rank = rank["rank"].values[0]
         message = get_sns_message_by_rank(rank)
@@ -174,7 +174,7 @@ def get_sns_message_by_rank(rank: int) -> str:
     if rank == 1:
         message += np.random.choice(
             [
-                "王者はいつだって孤独なものです。",
+                "誰もいない道を行く、王者はときには孤独になるものです",
                 "誰か追いつける人がいないと寂しいですね。",
                 "トップに立つことはいつだって特別です。私以外の人にとっては。",
                 "そろそろ順位を上げる喜びを味わってみたいものですね。",
@@ -197,6 +197,18 @@ def get_sns_message_by_rank(rank: int) -> str:
     elif rank == 3:
         message += np.random.choice(
             ["まだアンサンブルしてないだけです", "アイデアはあります。"]
+        )
+    else:
+        message += np.random.choice(
+            [
+                "急に天啓が降ってこないかな〜",
+                "このコンペ、完全に理解しました。",
+                "ここだけの話、順位を上げる算段はついています。",
+                "こういうときは一旦、落ち着きましょう",
+                "あの辺のバグ直したら賞金圏内かな？",
+                "今のスコアを見てもしょうがないです。夢を見るなら先のスコアを見ましょう。",
+                "はじめから諦めてしまったら、それこそ終わりです。",
+            ]
         )
 
     return message
