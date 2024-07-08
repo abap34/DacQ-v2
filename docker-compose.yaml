@@ -33,6 +33,8 @@ services:
         condition: service_healthy
     environment:
       DEV: "true"
+    volumes:
+      - ./backend:/app  
 
 volumes:
   mariadb_data:
