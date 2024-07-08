@@ -2,7 +2,9 @@ import datetime
 import os
 from typing import Literal
 
+import numpy as np
 import pymysql.cursors
+from sklearn.metrics import mean_squared_error
 
 
 class Constants:
@@ -36,3 +38,7 @@ class Constants:
         "private_start": datetime.datetime(2024, 7, 27, 17, 45, 0),
         "private_end": datetime.datetime(2024, 9, 7, 0, 0, 0),
     }
+
+    @staticmethod
+    def score(y_true: np.ndarray, y_pred: np.ndarray) -> np.float64:
+        return mean_squared_error(y_true, y_pred)

@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from const import Constants
 from sklearn.metrics import mean_squared_error
 
+from const import Constants
+from typing import Tuple, Union
 
 class ValidateState:
     VALID = 0
@@ -43,5 +44,30 @@ def validate(df: pd.DataFrame) -> bool:
     return ValidateState.VALID
 
 
-def score(y_true: np.ndarray, y_pred: np.ndarray) -> np.float64:
-    return mean_squared_error(y_true, y_pred)
+
+def load_public_private_setting() -> Tuple[np.ndarray, np.ndarray]:
+    public_private_setting = pd.read_csv(Constants.PUBLIC_PRIVATE_SETTING)
+    public_mask = public_private_setting["setting"] == "public"
+    private_mask = public_private_setting["setting"] == "private"
+    assert np.logical_or(public_mask, private_mask).all()
+
+    return public_mask.values, private_mask.values
+
+
+def public_and_private_score(
+    y_true: np.ndarray, y_pred: np.ndarray, public_mask: Union[np.ndarray, None] = None
+) -> np.float64:
+    if public_mask is None:
+        public_mask, _ = load_public_private_setting()
+
+    public_score = Constants.score(
+        y_true=y_true[public_mask],
+        y_pred=y_pred[public_mask],
+    )
+
+    private_score = Constants.score(
+        y_true=y_true[~public_mask],
+        y_pred=y_pred[~public_mask],
+    )
+
+    return public_score, private_score
