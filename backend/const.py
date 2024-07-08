@@ -28,8 +28,10 @@ class Constants:
     PUBLIC_PRIVATE_SETTING = "static/public_private_setting.csv"
 
     DATASETS = {
+        "train-tiny": "https://abap34.com/trap_ml_lecture/train_tiny.csv",
         "train": "https://abap34.com/trap_ml_lecture/train.csv",
         "test": "https://abap34.com/trap_ml_lecture/test.csv",
+        "sample_submission": "https://abap34.com/trap_ml_lecture/sample_submission.csv",
     }
 
     DATE = {
