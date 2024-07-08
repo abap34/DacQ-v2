@@ -1,13 +1,17 @@
 # base64
 import io
-from typing import List
+from typing import List, Union
 
-import db
 import pandas as pd
 import streamlit as st
-from const import Constants
-from db import add_team, get_submit, get_team
 from PIL import Image
+
+import db
+from const import Constants
+from db import add_team, get_team
+
+def get_all_teamname() -> List[str]:
+    return db.get_all_teamname()
 
 
 # df が
@@ -47,15 +51,22 @@ def setup_team(skip: bool = True):
 
 
 @st.cache_data
-def get_teamid(username: str) -> int:
-    team_df = pd.read_csv(Constants.TEAM_PATH)
+def get_team_setting():
+    return pd.read_csv(Constants.TEAM_PATH)
+
+
+@st.cache_data
+def get_teamid(username: str) -> Union[int, None]:
+    team_df = get_team_setting()
 
     melted = team_df.melt(id_vars=["id"], value_vars=["user1", "user2", "user3"])
 
     team_id = melted[melted["value"] == username]["id"].values
 
     if len(team_id) == 0:
-        raise ValueError(f"User {username} is not in any team.")
+        # raise ValueError(f"User {username} is not in any team.")
+        st.warning(f"User {username} is not in any team.")
+        return None
     else:
         team_id = team_id[0]
 
@@ -81,8 +92,9 @@ def get_teamname(team_id: int) -> str:
     return get_team(team_id)["name"]
 
 
+@st.cache_data
 def get_members(team_id: int) -> List[str]:
-    team_df = pd.read_csv(Constants.TEAM_PATH)
+    team_df = get_team_setting()
 
     team = team_df[team_df["id"] == team_id]
 
@@ -101,10 +113,3 @@ def get_team_submit(submitlog: pd.DataFrame, teamid: int) -> pd.DataFrame:
     team_subs = team_subs.sort_values("post_date")
 
     return team_subs
-
-
-@st.cache_data
-def get_all_team(submit: pd.DataFrame) -> List[str]:
-    all_team = submit["username"].apply(get_teamid).apply(get_teamname).unique()
-
-    return all_team

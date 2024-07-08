@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import pymysql.cursors
 import streamlit as st
+
 from const import Constants
 
 
@@ -280,6 +281,21 @@ def is_favorite(username: str, discussion_id: int) -> bool:
             result = cursor.fetchone()
 
             return result["COUNT(*)"] > 0
+
+    finally:
+        connection.close()
+
+
+def get_all_teamname() -> List[str]:
+    connection = pymysql.connect(**Constants.DB_CONFIG)
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT name FROM team"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            return [row["name"] for row in result]
 
     finally:
         connection.close()
