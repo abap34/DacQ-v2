@@ -118,8 +118,17 @@ def select_write(env):
     notebook = st.file_uploader("Choose a notebook file", type="ipynb")
 
     def submit_notebook():
-        add_discussion(title, notebook.read(), env["username"])
-        st.toast(f"ディスカッション {title} を投稿しました!", icon="🥳")
+        try:
+            add_discussion(title, notebook.read(), env["username"])
+        except Exception as e:
+            st.toast(
+                f"ディスカッションの投稿に失敗しました: {e}",
+                icon="😢",
+            )
+        else:
+            st.toast(f"ディスカッション {title} を投稿しました!", icon="🥳")
+        
+
 
     st.button(
         "ディスカッションを投稿する",
