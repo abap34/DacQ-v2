@@ -12,11 +12,16 @@ from score import public_and_private_score
 
 
 def select_submit(env):
-    if get_current_phase() != Phase.public:
-        st.warning("Sorry, Submission period is over!")
+    phase = get_current_phase()
+    if phase != Phase.public:
+        if phase == Phase.before_public:
+            st.warning("Competition has not started yet.")
+        elif phase == Phase.between:
+            st.warning("Public phase has ended. Please wait for the results.")
+        elif phase == Phase.after_private:
+            st.warning("Competition has ended.")
         return
     
-
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     submit = get_submit()
 
