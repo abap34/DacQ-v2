@@ -6,15 +6,15 @@ from db import get_submit
 def select_leaderboard(env):
     current_phase = get_current_phase()
     if current_phase == Phase.before_public:
-        st.write("## Competition has not started yet.")
+        st.warning("Competition has not started yet.")
         return
     
     if current_phase == Phase.after_public:
-        st.write("## Public phase has ended. Please wait for the results.")
+        st.warning("Public phase has ended. Please wait for the results.")
         return
     
     if current_phase == Phase.after_private:
-        st.write("## Competition has ended.")
+        st.warning("Competition has ended.")
         return
 
 
