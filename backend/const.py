@@ -26,6 +26,9 @@ class Constants:
 
     TEAM_PATH = "static/team_setting.csv"
     PUBLIC_PRIVATE_SETTING = "static/public_private_setting.csv"
+    PRIVATE_SUBMIT_COUNT = 2
+
+
 
     DATASETS = {
         "train-tiny": "https://abap34.com/trap_ml_lecture/train_tiny.csv",

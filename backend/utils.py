@@ -94,7 +94,7 @@ def to_imagebase64(image: Image) -> str:
 
 
 def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataFrame:
-    if phase not in [Phase.public, Phase.private]:
+    if phase == Phase.before_public or phase == Phase.after_private:
         return pd.DataFrame(
             columns=["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"]
         )
@@ -105,6 +105,10 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
 
     # チームの列をつける
     submitlog["teamid"] = submitlog["username"].apply(get_teamid)
+
+    if phase == Phase.private:
+        # 各チーム, 最新の2つのサブミットだけを残す
+        submitlog = submitlog.sort_values("post_date").groupby("teamid").tail(Constants.PRIVATE_SUBMIT_COUNT)
 
     # sort してチームごとに一番上取ってこれだけ残すことで順位表に変換
     ranking = (
