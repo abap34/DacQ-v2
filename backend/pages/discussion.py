@@ -15,6 +15,7 @@ from PIL import Image
 from streamlit_option_menu import option_menu
 from utils import load_env
 
+from setup import setup
 
 # base64 encode された画像を読む
 def read_nbimage(image: str) -> Image:
@@ -137,7 +138,6 @@ def main(env):
     )
 
     st.caption(f"Login as {env['username']}")
-    st.caption(f"Team: {env['teamname']}")
 
     st.sidebar.image(
         "static/icon.svg",
@@ -154,9 +154,14 @@ def main(env):
         """
     )
 
+    if st.session_state["attendee"]:
+        options = ["よむ", "かく"]
+    else:
+        options = ["よむ"]
+
     selected = option_menu(
         "ディスカッションを",
-        ["よむ", "かく"],
+        options,
         icons=["book", "pencil"],
         menu_icon="cast",
         default_index=0,
@@ -169,10 +174,6 @@ def main(env):
     elif selected == "かく":
         select_write(env)
 
-
-def setup():
-    st.session_state["has_run_setup"] = True
-    st.session_state["env"] = load_env()
 
 
 if __name__ == "__main__":
