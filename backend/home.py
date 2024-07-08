@@ -24,7 +24,7 @@ def main(session_state):
     )
 
     if session_state["attendee"]:
-        option =  ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"],
+        option =  ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"]
     else:
         option = ["LeaderBoard", "Score Log"]
 
@@ -75,7 +75,7 @@ def main(session_state):
         score_log.select_score_log(env)
 
     # ゲストユーザはここまで読める ここで return
-    
+
     if not session_state["attendee"]:
         st.warning("ゲストとしてログインしています。順位表の閲覧のみが可能でサブミットなどはできません。間違いと思われる場合は運営にお問い合わせください。")
         return
