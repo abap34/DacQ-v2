@@ -193,8 +193,7 @@ class Discussion:
     username: str
 
 
-# Discussionの列を取得
-# 重いのでこれは cache する
+@st.cache_data(ttl=60)
 def get_discussions() -> List[Discussion]:
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
@@ -285,7 +284,7 @@ def is_favorite(username: str, discussion_id: int) -> bool:
     finally:
         connection.close()
 
-
+@st.cache_data(ttl=60)
 def get_all_teamname() -> List[str]:
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
