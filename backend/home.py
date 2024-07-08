@@ -7,7 +7,9 @@ from setup import setup
 from utils import get_sns_message
 
 
-def main(env):
+def main(session_state):
+    env = session_state["env"]
+
     st.markdown(
         "### 開催中のコンペ: ",
     )
@@ -21,9 +23,15 @@ def main(env):
         divider="orange",
     )
 
+    if session_state["attendee"]:
+        option =  ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"],
+    else:
+        option = ["LeaderBoard", "Score Log"]
+
+
     selected = option_menu(
         None,
-        ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"],
+        option,
         icons=["house", "cloud-upload", "list-task", "file-earmark-text", "people"],
         menu_icon="cast",
         default_index=0,
@@ -59,23 +67,25 @@ def main(env):
         """
     )
 
-    st.sidebar.link_button(
-        "traQ に現在の順位を投稿する",
-        f"https://q.trap.jp/share-target?text={get_sns_message(get_submit(), env['teamname'])}",
-    )
-
     # 順位表
     if selected == "LeaderBoard":
         leaderboard.select_leaderboard(env)
 
-    elif selected == "Submit":
+    elif selected == "Score Log":
+        score_log.select_score_log(env)
+
+    # ゲストユーザはここまで読める ここで return
+    
+    if not session_state["attendee"]:
+        st.warning("ゲストとしてログインしています。順位表の閲覧のみが可能でサブミットなどはできません。間違いと思われる場合は運営にお問い合わせください。")
+        return
+
+    if selected == "Submit":
         submit.select_submit(env)
 
     elif selected == "Rules":
         rules.select_rules(env)
 
-    elif selected == "Score Log":
-        score_log.select_score_log(env)
 
     elif selected == "Team Setting":
         team_setting.select_team_setting(env)
@@ -83,9 +93,14 @@ def main(env):
     elif selected == "Data":
         data.select_data(env)
 
+    st.sidebar.link_button(
+        "traQ に現在の順位を投稿する",
+        f"https://q.trap.jp/share-target?text={get_sns_message(get_submit(), env['teamname'])}",
+    )
+
 
 if __name__ == "__main__":
     if "has_run_setup" not in st.session_state:
         setup()
 
-    main(st.session_state["env"])
+    main(st.session_state)
