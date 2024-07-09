@@ -90,6 +90,7 @@ def get_submit() -> pd.DataFrame:
                     "private_score",
                 ],
             )
+            df["post_date"] = pd.to_datetime(df["post_date"])
             return df
 
     finally:
