@@ -26,50 +26,55 @@ def select_submit(env):
     submit = get_submit()
 
     def _add_submit(username):
-        if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
-            validate_state = validate(df)
-            if validate_state != 0:
-                st.warning(
-                    "Invalid file: " + ValidateState.warning_message(validate_state)
-                )
-            else:
-                label = pd.read_csv(Constants.LABEL_PATH)
-                
-                public_score, private_score = public_and_private_score(
-                    label[Constants.LABEL_COL].values,
-                    df[Constants.PRED_COL].values,
-                    
-                )
-
-                is_best, prev_best = is_best_score(submit, username, public_score)
-
-                # ベストスコアかどうかを判定
-                if not is_best:
-                    st.toast("Not the best score... Keep trying!", icon="😢")
+        try:
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+                validate_state = validate(df)
+                if validate_state != 0:
+                    st.warning(
+                        "Invalid file: " + ValidateState.warning_message(validate_state)
+                    )
                 else:
-                    # お祝い
-                    rain(emoji="🎉", animation_length=1, falling_speed=2)
-                    st.success("Congratulations! You got the best score!")
-
-                    if np.isnan(prev_best):
-                        st.metric(
-                            label="Your First Score! Keep it up! 🦆",
-                            value=f"{public_score:.5f}",
-                        )
-                    else:
-                        st.metric(
-                            label="Best Score Updated ! ⤴️",
-                            value=f"{public_score:.5f}",
-                            delta=f"{public_score - prev_best:.5f}",
-                        )
-
-                    st.link_button(
-                        "スコア更新を traQ に共有する!",
-                        f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{public_score:.5f}です :nityaa_harsh:",
+                    label = pd.read_csv(Constants.LABEL_PATH)
+                    
+                    public_score, private_score = public_and_private_score(
+                        label[Constants.LABEL_COL].values,
+                        df[Constants.PRED_COL].values,
+                        
                     )
 
-                add_submit(env["username"], public_score, private_score)
+                    is_best, prev_best = is_best_score(submit, username, public_score)
+
+                    # ベストスコアかどうかを判定
+                    if not is_best:
+                        st.toast("Not the best score... Keep trying!", icon="😢")
+                    else:
+                        # お祝い
+                        rain(emoji="🎉", animation_length=1, falling_speed=2)
+                        st.success("Congratulations! You got the best score!")
+
+                        if np.isnan(prev_best):
+                            st.metric(
+                                label="Your First Score! Keep it up! 🦆",
+                                value=f"{public_score:.5f}",
+                            )
+                        else:
+                            st.metric(
+                                label="Best Score Updated ! ⤴️",
+                                value=f"{public_score:.5f}",
+                                delta=f"{public_score - prev_best:.5f}",
+                            )
+
+                        st.link_button(
+                            "スコア更新を traQ に共有する!",
+                            f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{public_score:.5f}です :nityaa_harsh:",
+                        )
+
+                    add_submit(env["username"], public_score, private_score)
+        except Exception as e:
+            st.error(f"Oops! Something went wrong: {e}")
+
+            
 
     st.button("Submit !", on_click=_add_submit, args=(env["username"],), type="primary")
 
