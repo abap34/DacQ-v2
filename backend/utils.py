@@ -14,6 +14,8 @@ from const import Constants
 from team import get_teamicon, get_teamid, get_teamname
 from user import get_username
 
+from zoneinfo import ZoneInfo
+
 
 class Phase:
     before_public = 0
@@ -24,7 +26,7 @@ class Phase:
 
 
 def get_current_phase() -> Phase:
-    now = pd.Timestamp.now()
+    now = pd.Timestamp.now(tz=ZoneInfo("Asia/Tokyo"))
     if now < Constants.DATE["public_start"]:
         return Phase.before_public
     elif now < Constants.DATE["public_end"]:
@@ -120,10 +122,15 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
         submitlog["username"].value_counts()
     )
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
+    lastsubmit_dates = submitlog.groupby("username")["post_date"].max()
+
+    # post_date が Asia/Tokyo であることを明確にする
+    lastsubmit_dates = lastsubmit_dates.dt.tz_localize(ZoneInfo("Asia/Tokyo"))
+    
 
     ranking["lastsubmit"] = ranking["username"].map(
-        now - submitlog.groupby("username")["post_date"].max()
+        now - lastsubmit_dates
     )
 
     ranking["lastsubmit"] = ranking["lastsubmit"].apply(readable_timedelta)
