@@ -12,41 +12,47 @@ class ValidateState:
     NAN_PRED = 3
     SHAPE_ERROR = 4
     TYPE_ERROR = 5
+    INVALID_ID = 6
 
     @staticmethod
     def warning_message(state: int) -> str:
         if state == ValidateState.INVALID_COLUMN:
-            return "Invalid column. Please check the column name."
+            return "カラムが不正です. `id`, `pred` というカラムが含まれているか確認してください."
         elif state == ValidateState.DUPLICATE_ID:
-            return "Duplicate id. Please check the id column."
+            return "id が重複しています. id はユニークである必要があります."
         elif state == ValidateState.NAN_PRED:
-            return "Nan in pred. Please check the prediction file."
+            return "pred に NaN が含まれています."
         elif state == ValidateState.SHAPE_ERROR:
-            return "Shape error. Please check the shape of the prediction file."
+            return "データのサイズが不正です."
         elif state == ValidateState.TYPE_ERROR:
-            return "Type error. Please check the type of the prediction column."
+            return "データの型が不正です."
+        elif state == ValidateState.INVALID_ID:
+            return "id が不正です. テストデータの id と一致しているか確認してください."
         else:
             return "Unknown error."
 
 
-def validate(df: pd.DataFrame) -> bool:
+def validate(submit: pd.DataFrame) -> bool:
     label = pd.read_csv(Constants.LABEL_PATH)
 
-    if df.shape != label.shape:
+    if submit.shape != label.shape:
         return ValidateState.SHAPE_ERROR
 
-    if (not Constants.ID_COL in df.columns) or (not Constants.PRED_COL in df.columns):
+    if (not Constants.ID_COL in submit.columns) or (not Constants.PRED_COL in submit.columns):
         return ValidateState.INVALID_COLUMN
 
-    if len(df[Constants.ID_COL].unique()) != len(df):
+    if len(submit[Constants.ID_COL].unique()) != len(submit):
         return ValidateState.DUPLICATE_ID
 
-    if df[Constants.PRED_COL].isnull().sum() > 0:
+    if submit[Constants.PRED_COL].isnull().sum() > 0:
         return ValidateState.NAN_PRED
     
-    if label[Constants.LABEL_COL].dtype != df[Constants.PRED_COL].dtype:
+    if label[Constants.LABEL_COL].dtype != submit[Constants.PRED_COL].dtype:
         return ValidateState.TYPE_ERROR
 
+    if not np.all(label[Constants.ID_COL] == submit[Constants.ID_COL]):
+        return ValidateState.INVALID_ID
+    
     return ValidateState.VALID
 
 
