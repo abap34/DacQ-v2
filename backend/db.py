@@ -69,7 +69,7 @@ def init_db():
     finally:
         connection.close()
 
-
+@st.cache_data(ttl=10)
 def get_submit() -> pd.DataFrame:
     # データベースに接続
     connection = pymysql.connect(**Constants.DB_CONFIG)
@@ -110,6 +110,7 @@ def add_submit(username: str, public_score: float, private_score: float):
         connection.close()
 
 
+@st.cache_data(ttl=10)
 def get_team(team_id: int) -> pd.DataFrame:
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
@@ -125,6 +126,7 @@ def get_team(team_id: int) -> pd.DataFrame:
         connection.close()
 
 
+@st.cache_data(ttl=10)
 def get_teamicon(team_id: int) -> bytes:
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
@@ -285,7 +287,7 @@ def is_favorite(username: str, discussion_id: int) -> bool:
     finally:
         connection.close()
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60 * 60 * 24 * 3)
 def get_all_teamname() -> List[str]:
     connection = pymysql.connect(**Constants.DB_CONFIG)
 
