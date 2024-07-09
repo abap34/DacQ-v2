@@ -75,14 +75,6 @@ HEAD = """
 | `srv_diff_host_rate` | real | ⭕️ | 異なるホストへの接続割合 |- |
 | `dst_host_count` | int | ⭕️ | 同一宛先ホストへの接続回数 |- |
 | `dst_host_srv_count` | int | ⭕️ | 同一宛先ホストの同一サービスへの接続回数 |- |
-| `dst_host_same_srv_rate` | real | ⭕️ | 同一宛先ホストの同一サービスへの接続割合 |- |
-| `dst_host_diff_srv_rate` | real | ⭕️ | 同一宛先ホストの異なるサービスへの接続割合 |- |
-| `dst_host_same_src_port_rate` | real | ⭕️ | 同一宛先ホストの同一送信元ポートへの接続割合 |- |
-| `dst_host_srv_diff_host_rate` | real | ⭕️ | 異なるホストの同一サービスへの接続割合 |- |
-| `dst_host_serror_rate` | real | ⭕️ | 同一宛先ホストの`SYN`エラー接続割合 |- |
-| `dst_host_srv_serror_rate` | real | ⭕️ | 同一宛先ホストの同一サービスへの`SYN`エラー接続割合 |- |
-| `dst_host_rerror_rate` | real | ⭕️ | 同一宛先ホストの`REJ`エラー接続割合 |- |
-| `dst_host_srv_rerror_rate` | real | ⭕️ | 同一宛先ホストの同一サービスへの`REJ`エラー接続割合 |- |
 | `class` | string | ❌ | 通信のクラス (`"normal"`, `"attack"` のいずれか) | ✅ |
 
 
