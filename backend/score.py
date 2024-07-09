@@ -11,19 +11,22 @@ class ValidateState:
     DUPLICATE_ID = 2
     NAN_PRED = 3
     SHAPE_ERROR = 4
+    TYPE_ERROR = 5
 
     @staticmethod
     def warning_message(state: int) -> str:
         if state == ValidateState.INVALID_COLUMN:
-            return "Invalid column"
+            return "Invalid column. Please check the column name."
         elif state == ValidateState.DUPLICATE_ID:
-            return "Duplicate id"
+            return "Duplicate id. Please check the id column."
         elif state == ValidateState.NAN_PRED:
-            return "Nan in pred"
+            return "Nan in pred. Please check the prediction file."
         elif state == ValidateState.SHAPE_ERROR:
-            return "Shape error"
+            return "Shape error. Please check the shape of the prediction file."
+        elif state == ValidateState.TYPE_ERROR:
+            return "Type error. Please check the type of the prediction column."
         else:
-            return "Unknown error"
+            return "Unknown error."
 
 
 def validate(df: pd.DataFrame) -> bool:
@@ -40,6 +43,9 @@ def validate(df: pd.DataFrame) -> bool:
 
     if df[Constants.PRED_COL].isnull().sum() > 0:
         return ValidateState.NAN_PRED
+    
+    if label[Constants.LABEL_COL].dtype != df[Constants.PRED_COL].dtype:
+        return ValidateState.TYPE_ERROR
 
     return ValidateState.VALID
 
