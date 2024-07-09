@@ -23,7 +23,13 @@
 本コンペティションでは、正解率を評価指標として利用します。
 
 $$
-Accuracy = \dfrac{1}{n}\sum_{i=1}^{n} \ I(y_i = \hat{y}_i) \text { where } I(x) = \begin{cases} 1 & (x = True) \\ 0 & (x = False) \end{cases}
+\begin{align*}
+\large{Accuracy = \dfrac{1}{n}\sum_{i=1}^{n} \ I(y_i = \hat{y}_i)} \\
+\text{where} \ I(x) = \begin{cases}
+1 & (x = \text{True}) \\
+0 & (x = \text{False})
+\end{cases}
+\end{align*}
 $$
 
 例えば、予測が $(1, 1, 0, 0)$ で、正解データが $(1, 1, 1, 0)$ の場合、正解率の値は $0.75$ です。
@@ -34,11 +40,11 @@ $$
 
 ```csv
 id,pred
-1,0
-2,1
-3,0
-4,1
-5,0
+1,normal
+2,attack
+3,normal
+4,normal
+5,attack
 ...
 ```
 
@@ -46,7 +52,7 @@ id,pred
 
 - `id`, `pred` という二つ列からなる
   - `id` はテストデータの `id` と一致している
-  - `pred` は `0` または `1` である
+  - `pred` は `normal` または `attack` のいずれかである
 
 
 ## Timeline
