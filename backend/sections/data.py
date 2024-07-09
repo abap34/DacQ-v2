@@ -83,7 +83,7 @@ HEAD = """
 | `dst_host_srv_serror_rate` | real | ⭕️ | 同一宛先ホストの同一サービスへの`SYN`エラー接続割合 |- |
 | `dst_host_rerror_rate` | real | ⭕️ | 同一宛先ホストの`REJ`エラー接続割合 |- |
 | `dst_host_srv_rerror_rate` | real | ⭕️ | 同一宛先ホストの同一サービスへの`REJ`エラー接続割合 |- |
-| `class` | string | ❌ | 通信のクラス (`"normal"`, `"anomaly"` のいずれか) | ✅ |
+| `class` | string | ❌ | 通信のクラス (`"normal"`, `"attack"` のいずれか) | ✅ |
 
 
 ### test.csv
@@ -104,7 +104,7 @@ train.csv のうち欠損値が含まれない行を抽出した **train.csvの�
 
 `id` は `test.csv` の `id` と完全に一致しています。
 
-`class` には `normal` または `anomaly` がランダムに入っています。
+`class` には `normal` または `attack` がランダムに入っています。
 
 """
 
