@@ -10,7 +10,7 @@ from team import get_team_setting
 
 def get_username():
     headers = _get_websocket_headers()
-    user = headers.get("X-Forwarded-User")
+    user = headers.get("X-Forwarded-User").lower()
     # local mode
     dev = os.getenv("DEV")
     if dev:
