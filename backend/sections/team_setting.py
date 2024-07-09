@@ -48,5 +48,10 @@ def select_team_setting(env):
         file_data = byte_io.getvalue()
 
     if st.button("Save"):
-        update_teamicon(env["teamid"], file_data)
-        update_teamname(env["teamid"], team_name)
+        try:
+            update_teamname(env["teamid"], team_name)
+            update_teamicon(env["teamid"], file_data)
+        except Exception as e:
+            st.toast(f"Oops! Something went wrong: {e}", icon="💥")
+
+        st.toast("Saved!", icon="👍")
