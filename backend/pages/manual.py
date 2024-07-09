@@ -1,5 +1,11 @@
 import streamlit as st
 
+st.set_page_config(
+    page_title="DacQ - Manual",
+    page_icon="📝",
+    layout="wide",
+)
+
 
 st.write(
 """
@@ -15,7 +21,7 @@ st.write(
         border-bottom: 1px solid #eaecef;
         margin-bottom: 1em;
     }
-    
+
 </style>
 
 
