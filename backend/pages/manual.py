@@ -4,6 +4,21 @@ import streamlit as st
 st.write(
 """
 
+<style>
+    h2 {
+        border-bottom: 2px solid #eaecef;
+        margin-bottom: 1em;
+
+    }
+
+    h3 {
+        border-bottom: 1px solid #eaecef;
+        margin-bottom: 1em;
+    }
+    
+</style>
+
+
 # DacQ-v2 のマニュアル 🦆📈
 
 ## DacQ-v2 とは?
@@ -20,7 +35,7 @@ DacQ の機能は大きく分けて二つのページで提供されます。
 
 ### home
 
-"""
+""", unsafe_allow_html=True
 )
 
 
