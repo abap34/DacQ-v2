@@ -141,6 +141,11 @@ def select_write(env):
 
 
 def main(env):
+    st.set_page_config(
+        page_title="DacQ - Discussion",
+        page_icon="🔈",
+        layout="wide",
+    )
     st.header(
         """
         Discussion 🔈

@@ -25,12 +25,6 @@ def is_attendee():
 
 
 def setup():
-    st.set_page_config(
-        page_title="DacQ",
-        page_icon="🦆",
-        layout="wide",
-    )
-
     init_db()
     setup_team(skip=True)
     attendee = is_attendee()

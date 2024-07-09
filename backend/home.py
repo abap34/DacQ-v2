@@ -100,6 +100,12 @@ def main(session_state):
 
 
 if __name__ == "__main__":
+    st.set_page_config(
+        page_title="DacQ - home",
+        page_icon="🦆",
+        layout="wide",
+    )
+        
     if "has_run_setup" not in st.session_state:
         setup()
 
