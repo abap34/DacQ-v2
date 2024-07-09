@@ -10,7 +10,7 @@ from team import get_team_setting
 
 def get_username():
     headers = _get_websocket_headers()
-    user = headers.get("X-Forwarded-User").lower()
+    user = headers.get("X-Forwarded-User")
     # local mode
     dev = os.getenv("DEV")
     if dev:
@@ -21,7 +21,7 @@ def get_username():
             st.error("Login required")
             st.stop()
 
-    return user
+    return user.lower()
 
 
 def get_all_user() -> np.ndarray:
