@@ -27,6 +27,7 @@ HEAD = """
 - train.csv : 学習用データ
 - test.csv : テスト用データ
 - train-tiny.csv : 欠損値が含まれない学習用データのサブセット
+- test-fillna.csv : 欠損値が全て0で埋められたテスト用データ
 - sample_submission.csv : 提出用のサンプルファイル
 
 ### train.csv
@@ -87,6 +88,10 @@ HEAD = """
 ### train-tiny.csv
 
 train.csv のうち欠損値が含まれない行を抽出した **train.csvのサブセットです。**
+
+### test-fillna.csv 
+
+test.csv について、欠損値を全て0で埋めたデータです。
 
 ### sample_submission.csv
 
