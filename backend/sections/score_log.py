@@ -4,8 +4,7 @@ from db import get_submit
 from team import get_all_teamname
 from utils import get_score_progress
 
-@st.cache_data(ttl=60)
-def select_score_log(env):
+def select_score_log(_env):
     submit = get_submit()
     all_team = get_all_teamname()
     team = st.selectbox("Select Team", all_team)
