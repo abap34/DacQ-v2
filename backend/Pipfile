@@ -99,6 +99,7 @@ traitlets = "==5.14.3"
 validators = "==0.28.1"
 webencodings = "==0.5.1"
 zipp = "==3.18.1"
+dbutils = "*"
 
 [dev-packages]
 

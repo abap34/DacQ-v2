@@ -1,16 +1,20 @@
 import datetime
 from dataclasses import dataclass
 from typing import List
-
 import pandas as pd
 import pymysql.cursors
 import streamlit as st
-
 from const import Constants
+from dbutils.pooled_db import PooledDB
 
+# Connection Pool
+POOL = PooledDB(pymysql, maxconnections=5, **Constants.DB_CONFIG)
+
+def get_connection():
+    return POOL.connection()
 
 def init_db():
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -27,7 +31,6 @@ def init_db():
                     public_score DOUBLE NOT NULL,
                     private_score DOUBLE NOT NULL
                 );
-
                 """
             )
 
@@ -69,10 +72,9 @@ def init_db():
     finally:
         connection.close()
 
-@st.cache_data(ttl=10)
+@st.cache_data(ttl=20)
 def get_submit() -> pd.DataFrame:
-    # データベースに接続
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -98,7 +100,7 @@ def get_submit() -> pd.DataFrame:
 
 
 def add_submit(username: str, public_score: float, private_score: float):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -112,7 +114,7 @@ def add_submit(username: str, public_score: float, private_score: float):
 
 @st.cache_data(ttl=10)
 def get_team(team_id: int) -> pd.DataFrame:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -128,7 +130,7 @@ def get_team(team_id: int) -> pd.DataFrame:
 
 @st.cache_data(ttl=10)
 def get_teamicon(team_id: int) -> bytes:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -143,17 +145,14 @@ def get_teamicon(team_id: int) -> bytes:
 
 
 def add_team(team_id: int, name: str, icon_binaries: bytes, skip: bool = False):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            # IDが存在するかチェックするためのSQL文
             cursor.execute("SELECT COUNT(*) FROM team WHERE id = %s", (team_id,))
             if cursor.fetchone()["COUNT(*)"] == 0:
-                # IDが存在しない場合は新規追加
                 sql = "INSERT INTO team (id, name, icon) VALUES (%s, %s, %s)"
                 cursor.execute(sql, (team_id, name, icon_binaries))
             else:
-                # ID が存在するならスキップ. ただしスキップフラグが立っていない場合は上書き
                 if not skip:
                     update_teamname(team_id, name)
                     update_teamicon(team_id, icon_binaries)
@@ -164,7 +163,7 @@ def add_team(team_id: int, name: str, icon_binaries: bytes, skip: bool = False):
 
 
 def update_teamname(team_id: int, name: str):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
             sql = "UPDATE team SET name = %s WHERE id = %s"
@@ -176,7 +175,7 @@ def update_teamname(team_id: int, name: str):
 
 
 def update_teamicon(team_id: int, icon_binaries: bytes):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
             sql = "UPDATE team SET icon = %s WHERE id = %s"
@@ -198,7 +197,7 @@ class Discussion:
 
 @st.cache_data(ttl=60)
 def get_discussions() -> List[Discussion]:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -225,7 +224,7 @@ def get_discussions() -> List[Discussion]:
 
 
 def add_discussion(title: str, content: bytes, username: str):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -240,7 +239,7 @@ def add_discussion(title: str, content: bytes, username: str):
 
 
 def get_favoritecount(discussion_id: int) -> int:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -254,9 +253,8 @@ def get_favoritecount(discussion_id: int) -> int:
         connection.close()
 
 
-# いいねを追加. もし既にいいねしていたらそれを削除
 def put_favorite(username: str, discussion_id: int):
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -272,7 +270,7 @@ def put_favorite(username: str, discussion_id: int):
 
 
 def is_favorite(username: str, discussion_id: int) -> bool:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -287,9 +285,10 @@ def is_favorite(username: str, discussion_id: int) -> bool:
     finally:
         connection.close()
 
+
 @st.cache_data(ttl=60 * 60 * 24 * 3)
 def get_all_teamname() -> List[str]:
-    connection = pymysql.connect(**Constants.DB_CONFIG)
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
