@@ -129,7 +129,7 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
     lastsubmit_dates = lastsubmit_dates.dt.tz_localize(ZoneInfo("Asia/Tokyo")) 
 
     ranking["lastsubmit"] = ranking["username"].map(
-        now - lastsubmit_dates + datetime.timedelta(hours=9)
+        now - lastsubmit_dates - datetime.timedelta(hours=9)
     )
 
     ranking["lastsubmit"] = ranking["lastsubmit"].apply(readable_timedelta)
