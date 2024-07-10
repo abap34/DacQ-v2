@@ -286,7 +286,7 @@ def is_favorite(username: str, discussion_id: int) -> bool:
         connection.close()
 
 
-@st.cache_data(ttl=60 * 60 * 24 * 3)
+@st.cache_data(ttl=20)
 def get_all_teamname() -> List[str]:
     connection = get_connection()
 
