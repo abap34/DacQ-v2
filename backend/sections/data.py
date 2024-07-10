@@ -109,7 +109,7 @@ test.csv について、カテゴリ変数をのぞき、欠損値を全て0で�
 
 
 
-
+@st.cache_data(ttl=60)
 def select_data(env):
     datasets = Constants.DATASETS
     st.write(HEAD, unsafe_allow_html=True)
