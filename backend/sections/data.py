@@ -26,8 +26,8 @@ HEAD = """
 
 - train.csv : 学習用データ
 - test.csv : テスト用データ
-- train-tiny.csv : 欠損値が含まれない学習用データのサブセット
-- test-fillna.csv : 欠損値が全て0で埋められたテスト用データ
+- train_tiny.csv : 欠損値とカテゴリ変数が含まれない学習用データのサブセット
+- test_tiny.csv : 欠損値が全て0で埋められたカテゴリ変数を含まないテスト用データ
 - sample_submission.csv : 提出用のサンプルファイル
 
 ### train.csv
@@ -85,13 +85,15 @@ HEAD = """
 
 各カラムは `train.csv` と同じですが、`class` が含まれていません。
 
-### train-tiny.csv
+### train_tiny.csv
 
-train.csv のうち欠損値が含まれない行を抽出した **train.csvのサブセットです。**
+train.csv からカテゴリ変数(データ型が `string` のカラム)をのぞき、欠損値が含まれない行を抽出した **train.csvのサブセットです。**
 
-### test-fillna.csv 
+(講習会で使うためのものです)
 
-test.csv について、欠損値を全て0で埋めたデータです。
+### test_tiny.csv
+
+test.csv について、カテゴリ変数をのぞき、欠損値を全て0で埋めたものです。
 
 ### sample_submission.csv
 

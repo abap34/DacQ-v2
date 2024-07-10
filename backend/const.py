@@ -33,8 +33,8 @@ class Constants:
     DATASETS = {
         "train": "https://abap34.com/trap_ml_lecture/train.csv",
         "test": "https://abap34.com/trap_ml_lecture/test.csv",
-        "train-tiny": "https://abap34.com/trap_ml_lecture/train_tiny.csv",
-        "test-fillna": "https://abap34.com/trap_ml_lecture/test_fillna.csv",
+        "train_tiny": "https://abap34.com/trap_ml_lecture/train_tiny.csv",
+        "test_tiny": "https://abap34.com/trap_ml_lecture/test_tiny.csv",
         "sample_submission": "https://abap34.com/trap_ml_lecture/sample_submission.csv",
     }
 
