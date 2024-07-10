@@ -31,11 +31,11 @@ class Constants:
 
 
     DATASETS = {
-        "train": "https://abap34.com/trap_ml_lecture/train.csv",
-        "test": "https://abap34.com/trap_ml_lecture/test.csv",
-        "train_tiny": "https://abap34.com/trap_ml_lecture/train_tiny.csv",
-        "test_tiny": "https://abap34.com/trap_ml_lecture/test_tiny.csv",
-        "sample_submission": "https://abap34.com/trap_ml_lecture/sample_submission.csv",
+        "train": "https://abap34.com/trap_ml_lecture/public-data/train.csv",
+        "test": "https://abap34.com/trap_ml_lecture/public-data/test.csv",
+        "train_tiny": "https://abap34.com/trap_ml_lecture/public-data/train_tiny.csv",
+        "test_tiny": "https://abap34.com/trap_ml_lecture/public-data/test_tiny.csv",
+        "sample_submission": "https://abap34.com/trap_ml_lecture/public-data/sample_submission.csv",
     }
 
     DATE = {
