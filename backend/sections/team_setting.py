@@ -38,7 +38,7 @@ def select_team_setting(env):
     if uploaded_file is not None:
         st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
         image = Image.open(uploaded_file)
-        image = image.thumbnail((128, 128))
+        image.thumbnail((128, 128))
         byte_io = io.BytesIO()
         image.save(byte_io, format="PNG")
         file_data = byte_io.getvalue()
