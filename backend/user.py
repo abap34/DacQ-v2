@@ -1,27 +1,68 @@
+import base64
+import json
 import os
 
 import numpy as np
 import pandas as pd
 import streamlit as st
-from streamlit.web.server.websocket_headers import _get_websocket_headers
-
+from streamlit_oauth import OAuth2Component
 from team import get_team_setting
 
 
-def get_username():
-    headers = _get_websocket_headers()
-    user = headers.get("X-Forwarded-User")
-    # local mode
-    dev = os.getenv("DEV")
-    if dev:
-        if user is None:
-            return "abap34"
-    else:
-        if user is None:
-            st.error("Login required")
-            st.stop()
+def get_payload(token: str) -> dict:
+    payload = token.split(".")[1]
+    payload += "=" * ((4 - len(payload) % 4) % 4)
+    return json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
 
-    return user.lower()
+def get_user_name(token: str) -> str:
+    return get_payload(token)["name"]
+
+
+AUTHORIZE_URL = os.environ["AUTHORIZE_URL"]
+TOKEN_URL = os.environ["TOKEN_URL"]
+CLIENT_ID = os.environ["CLIENT_ID"]
+CLIENT_SECRET = os.environ["CLIENT_SECRET"]
+REDIRECT_URI = os.environ["REDIRECT_URI"]
+
+oauth2 = OAuth2Component(
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    authorize_endpoint=AUTHORIZE_URL,
+    token_endpoint=TOKEN_URL,
+)
+
+
+def is_login():
+    if "token" in st.session_state:
+        return True
+    else:
+        return False
+
+
+def login():
+    result = oauth2.authorize_button(
+        "Authorize", REDIRECT_URI, "openid", key="trap", pkce="S256"
+    )
+
+    if result and "token" in result:
+        st.session_state["token"] = result["token"]
+        token_str = str(result.get("token"))
+        username = get_user_name(token_str)
+        st.session_state["username"] = username
+        st.toast(f"Login finished! Welcome, {username}!", icon="✅")
+        st.rerun()
+
+    st.stop()
+
+def get_username():
+    login = is_login()
+    if not login:
+        st.toast("Login required!", icon="⚠️")
+        login()
+
+    assert "token" in st.session_state
+
+    return st.session_state["username"].lower()
 
 
 def get_all_user() -> np.ndarray:
