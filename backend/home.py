@@ -6,7 +6,6 @@ from sections import data, leaderboard, rules, score_log, submit, team_setting
 from setup import setup
 from utils import get_sns_message
 
-
 def main(session_state):
     env = session_state["env"]
 
@@ -99,12 +98,12 @@ def main(session_state):
     # )
 
 
+from user import is_login, login
 if __name__ == "__main__":
-    st.set_page_config(
-        page_title="DacQ - home",
-        page_icon="🦆",
-        layout="wide",
-    )
+    if not is_login():
+        st.toast("Login required!", icon="⚠️")
+        login()
+        st.stop()
         
     if "has_run_setup" not in st.session_state:
         setup()
