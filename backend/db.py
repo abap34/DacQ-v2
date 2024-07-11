@@ -8,7 +8,7 @@ from const import Constants
 from dbutils.pooled_db import PooledDB
 
 # Connection Pool
-POOL = PooledDB(pymysql, maxconnections=10, **Constants.DB_CONFIG)
+POOL = PooledDB(pymysql, maxconnections=150, **Constants.DB_CONFIG)
 
 def get_connection():
     return POOL.connection()
