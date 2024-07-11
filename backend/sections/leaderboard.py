@@ -91,7 +91,6 @@ def show_leaderboard(phase: Phase):
 
         
 
-@st.cache_data(ttl=10)
 def select_leaderboard(_env):
     current_phase = get_current_phase()
     if current_phase == Phase.before_public:

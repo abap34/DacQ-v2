@@ -52,8 +52,6 @@ def load_env():
         "teamicon": teamicon,
     }
 
-
-@st.cache_data
 def load_rules():
     with open("static/rules.md", "r") as f:
         rules = f.read()

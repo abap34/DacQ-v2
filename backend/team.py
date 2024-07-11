@@ -50,12 +50,10 @@ def setup_team(skip: bool = True):
         add_team(team_id, name, icon_binaries, skip=skip)
 
 
-@st.cache_data(ttl=60 * 60 * 24)
 def get_team_setting():
     return pd.read_csv(Constants.TEAM_PATH)
 
 
-@st.cache_data(ttl=60 * 60 * 24)
 def get_teamid(username: str) -> Union[int, None]:
     team_df = get_team_setting()
 
@@ -72,7 +70,6 @@ def get_teamid(username: str) -> Union[int, None]:
 
     return team_id
 
-@st.cache_data(ttl=10)
 def get_teamicon(team_id: int) -> Image:
     team_icon = db.get_teamicon(team_id)
 
@@ -81,18 +78,15 @@ def get_teamicon(team_id: int) -> Image:
 
     return team_icon
 
-@st.cache_data(ttl=10)
 def get_teamname_from_username(usernames: str) -> str:
     team_id = get_teamid(usernames)
 
     return get_teamname(team_id)
 
-@st.cache_data(ttl=10)
 def get_teamname(team_id: int) -> str:
     return get_team(team_id)["name"]
 
 
-@st.cache_data(ttl=60 * 60 * 24)
 def get_members(team_id: int) -> List[str]:
     team_df = get_team_setting()
 
@@ -105,7 +99,6 @@ def get_members(team_id: int) -> List[str]:
     ]
 
 
-@st.cache_data(ttl=10)
 def get_team_submit(submitlog: pd.DataFrame, teamid: int) -> pd.DataFrame:
     submitlog["teamid"] = submitlog["username"].apply(get_teamid)
 
