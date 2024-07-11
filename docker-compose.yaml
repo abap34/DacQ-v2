@@ -33,8 +33,15 @@ services:
         condition: service_healthy
     environment:
       DEV: "true"
+      CLIENT_ID: "${CLIENT_ID}"
+      CLIENT_SECRET: "${CLIENT_SECRET}"
+      REDIRECT_URI: "${REDIRECT_URI}"
+      AUTHORIZE_URL: "${AUTHORIZE_URL}"
+      TOKEN_URL: "${TOKEN_URL}"
+
     volumes:
       - ./backend:/app  
+
 
   adminer:
     image: adminer
