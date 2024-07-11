@@ -72,7 +72,6 @@ def init_db():
     finally:
         connection.close()
 
-@st.cache_data(ttl=20)
 def get_submit() -> pd.DataFrame:
     connection = get_connection()
 
@@ -112,7 +111,6 @@ def add_submit(username: str, public_score: float, private_score: float):
         connection.close()
 
 
-@st.cache_data(ttl=10)
 def get_team(team_id: int) -> pd.DataFrame:
     connection = get_connection()
 
@@ -128,7 +126,6 @@ def get_team(team_id: int) -> pd.DataFrame:
         connection.close()
 
 
-@st.cache_data(ttl=10)
 def get_teamicon(team_id: int) -> bytes:
     connection = get_connection()
 
@@ -195,7 +192,6 @@ class Discussion:
     username: str
 
 
-@st.cache_data(ttl=60)
 def get_discussions() -> List[Discussion]:
     connection = get_connection()
 
@@ -286,7 +282,6 @@ def is_favorite(username: str, discussion_id: int) -> bool:
         connection.close()
 
 
-@st.cache_data(ttl=20)
 def get_all_teamname() -> List[str]:
     connection = get_connection()
 
