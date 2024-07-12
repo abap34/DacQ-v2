@@ -5,6 +5,9 @@ from db import get_submit
 from sections import data, leaderboard, rules, score_log, submit, team_setting
 from setup import setup
 from utils import get_sns_message
+import os 
+from user import is_login, login
+
 
 def main(session_state):
     env = session_state["env"]
@@ -98,8 +101,26 @@ def main(session_state):
     # )
 
 
-from user import is_login, login
 if __name__ == "__main__":
+    if os.environ.get("NS", False):
+        st.write(
+            """
+
+            # 重要なおしらせ
+
+            この url は現在使用されていません。
+
+            [dacq.abap34.com](https://dacq.abap34.com) をご利用ください。
+            
+
+            """
+        )
+
+        st.stop()
+    
+
+    
+    
     if not is_login():
         st.toast("Login required!", icon="⚠️")
         login()
