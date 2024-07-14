@@ -21,15 +21,17 @@ def show_leaderboard(phase: Phase):
             return [f'background-color: {color}; {styles};' for _ in x]
 
         return ['' for _ in x]
+
+    
     
     if phase == Phase.public:
         st.write("## Public Leaderboard")
         submit = get_submit()
         ranking = to_ranking(submit, phase=phase)
 
-        n_row = ranking.shape[0]
         progress_max = ranking["progress"].max()
         progress_min = ranking["progress"].min()
+        n_row = ranking.shape[0]
 
 
         ranking["icon"] = ranking["icon"].apply(to_imagebase64)
@@ -53,7 +55,7 @@ def show_leaderboard(phase: Phase):
                 "progress": st.column_config.ProgressColumn(
                     width=75, min_value=progress_min - 0.01, max_value=progress_max, format=" ", label=""
                 ),
-                "score": st.column_config.NumberColumn(width=200, format="%.5f"),
+                "score": st.column_config.NumberColumn(width=150, format="%.5f"),
                 "submitcount": st.column_config.NumberColumn(width=50),
                 "lastsubmit": {},
             },
@@ -68,6 +70,10 @@ def show_leaderboard(phase: Phase):
         private_lb = to_ranking(submit, phase=Phase.private)
         private_lb["icon"] = private_lb["icon"].apply(to_imagebase64)
 
+        progress_max = private_lb["progress"].max()
+        progress_min = private_lb["progress"].min()
+    
+
         # shake を計算
         # 各 teamname に対して、public の rank - private の rank を計算
         shake = public_lb.merge(
@@ -80,46 +86,45 @@ def show_leaderboard(phase: Phase):
 
         def shake_icon(x):
             if x > 0:
-                return "⇧ " + str(x)
+                return str(x) + " ↑"
             if x < 0:
-                return "⇩ " + str(x)
-            return "⇨" + str(x)
+                return str(x) + " ↓"
+            return ""
 
         private_lb["shake"] = private_lb["shake"].apply(shake_icon)
 
         def shake_styler(x):
-            if "⇧" in x:
-                return "color: green"
+            if "↑" in x:
+                return "color: #32CD32"
 
-            if "⇩" in x:
-                return "color: lightcoral"
+            if "↓" in x:
+                return "color: #FF6347"
 
-            return "color: blue"
-
-
-        private_lb_styled = private_lb.style.applymap(
-            rank_styler, subset=["rank"]
+            return ""
+        
+        private_lb_styled = private_lb.style.apply(
+            rank_styler, axis=1
         ).applymap(shake_styler, subset=["shake"])
 
         st.write("### Private Leaderboard")
         st.dataframe(
             private_lb_styled,
             hide_index=True,
+            height=35 * 35,
             column_config={
-                "rank": {},
-                "teamname": st.column_config.TextColumn(label="Team Name", width=400),
+                "rank": st.column_config.NumberColumn(width=50),
+                "teamname": st.column_config.TextColumn(label="Team Name", width=300),
                 "icon": st.column_config.ImageColumn(label="", width=150),
                 "user1icon": st.column_config.ImageColumn(label="", width=50),
                 "user2icon": st.column_config.ImageColumn(label="", width=50),
                 "user3icon": st.column_config.ImageColumn(label="", width=50),
-                "score": st.column_config.ProgressColumn(
-                    width=200, min_value=0.75, max_value=1, format="%.5f"
+                "progress": st.column_config.ProgressColumn(
+                    width=75, min_value=progress_min - 0.01, max_value=progress_max, format=" ", label=""
                 ),
+                "score": st.column_config.NumberColumn(width=150, format="%.5f"),
                 "submitcount": st.column_config.NumberColumn(width=50),
                 "lastsubmit": {},
-                "rank_public": {},
-                "rank_private": {},
-                "shake": {},
+                "shake": {},    
             },
             use_container_width=True,
         )
