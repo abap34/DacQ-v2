@@ -53,6 +53,5 @@ class Constants:
     
     @staticmethod
     def progress_scaler(scores: pd.Series) -> np.ndarray:
-        pt = yeojohnson(scores)[0]
-        return pt
+        return scores
     
