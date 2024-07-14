@@ -98,6 +98,14 @@ def get_members(team_id: int) -> List[str]:
         team["user3"].values[0],
     ]
 
+def get_team_df(team_ids: List[int]) -> pd.DataFrame:
+    team_df = get_team_setting()
+    
+    # team_df["id"] を並べ替えて、team_ids と一緒になるようにする
+    team_df = team_df.set_index("id").loc[team_ids].reset_index()
+
+    return team_df
+
 
 def get_team_submit(submitlog: pd.DataFrame, teamid: int) -> pd.DataFrame:
     submitlog["teamid"] = submitlog["username"].apply(get_teamid)
