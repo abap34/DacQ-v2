@@ -5,6 +5,8 @@ from typing import Literal
 import numpy as np
 import pymysql.cursors
 from sklearn.metrics import accuracy_score
+import pandas as pd
+from scipy.stats import yeojohnson
 
 from zoneinfo import ZoneInfo
 
@@ -48,3 +50,9 @@ class Constants:
     @staticmethod
     def score(y_true: np.ndarray, y_pred: np.ndarray) -> np.float64:
         return accuracy_score(y_true, y_pred)
+    
+    @staticmethod
+    def progress_scaler(scores: pd.Series) -> np.ndarray:
+        pt = yeojohnson(scores)[0]
+        return pt
+    
