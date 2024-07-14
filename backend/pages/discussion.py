@@ -26,7 +26,9 @@ def render_html_out(html: str):
     st.write(
         f"""
         <div style="overflow-x: auto;">
+        <pre>
         {html}
+        </pre>
         </div>
         """,
         unsafe_allow_html=True,
@@ -35,9 +37,12 @@ def render_html_out(html: str):
 
 def render_notebook(notebook: bytes):
     notebook = nbformat.reads(notebook, as_version=4)
+    cell_idx = 0
     for cell in notebook.cells:
         if cell.cell_type == "code":
-            st.code(cell.source)
+            st.write(f"[{cell_idx}]")
+            cell_idx += 1
+            st.code(cell.source, line_numbers=True, language="python")
             for output in cell.outputs:
                 if output.output_type == "display_data":
                     st.image(read_nbimage(output.data["image/png"]))
@@ -45,9 +50,9 @@ def render_notebook(notebook: bytes):
                     if "text/html" in output.data:
                         render_html_out(output.data["text/html"])
                     else:
-                        st.write(output.data["text/plain"])
+                        st.code(output.data["text/plain"])
                 elif output.output_type == "stream":
-                    st.write(output.text)
+                    st.code(output.text)
                 elif output.output_type == "error":
                     st.error(output.ename)
                     st.error(output.evalue)
