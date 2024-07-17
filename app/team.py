@@ -16,14 +16,27 @@ def get_all_teamname() -> List[str]:
 
 # df が
 # 1. id が unique
-# 2. カラムが [id, user1, user2, user3] からなる
-# 3. user1, user2, user3 が unique　かチェック
+# 2. カラムが [id, use{num}...] からなるかチェック
+# 3. NaN 除いて、 unique かチェック
 def validate_team(df: pd.DataFrame) -> bool:
-    if df.columns.tolist().sort() != ["id", "user1", "user2", "user3"].sort():
-        raise ValueError("Invalid column name! Please check the data.")
-
-    all_user = pd.concat([df["user1"], df["user2"], df["user3"]], ignore_index=True)
-
+    # check id is exist
+    if "id" not in df.columns:
+        raise ValueError("No `id` column in team setting.")
+    
+    # check id is unique
+    if len(df["id"].unique()) != len(df):
+        raise ValueError("Duplicate team id! Please check the data.")
+    
+    # check columns
+    for col in df.columns:
+        if col == "id":
+            continue
+        if not col.startswith("user"):
+            raise ValueError("Invalid column name! Please check the data.")
+        
+    # check user name is unique
+    user_col = [col for col in df.columns if col.startswith("user")]
+    all_user = df[user_col].melt()["value"].str.strip()
     all_user = all_user.dropna()
 
     if len(all_user.unique()) != len(all_user):
@@ -56,15 +69,14 @@ def get_team_setting():
 
 def get_teamid(username: str) -> Union[int, None]:
     team_df = get_team_setting()
+    user_col = [col for col in team_df.columns if col.startswith("user")]
 
-    melted = team_df.melt(id_vars=["id"], value_vars=["user1", "user2", "user3"])
+    melted = team_df.melt(id_vars=["id"], value_vars=user_col, value_name="value")
 
     team_id = melted[melted["value"] == username]["id"].values
 
     if len(team_id) == 0:
-        # raise ValueError(f"User {username} is not in any team.")
-        st.warning(f"User {username} is not in any team.")
-        return None
+        raise ValueError(f"User {username} is not in any team.")
     else:
         team_id = team_id[0]
 
@@ -92,11 +104,12 @@ def get_members(team_id: int) -> List[str]:
 
     team = team_df[team_df["id"] == team_id]
 
-    return [
-        team["user1"].values[0],
-        team["user2"].values[0],
-        team["user3"].values[0],
-    ]
+    user_col = [col for col in team_df.columns if col.startswith("user")]
+
+    members = team[user_col].melt()["value"].str.strip()
+    
+    return members
+
 
 def get_team_df(team_ids: List[int]) -> pd.DataFrame:
     team_df = get_team_setting()

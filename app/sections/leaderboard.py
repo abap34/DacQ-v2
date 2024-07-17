@@ -1,29 +1,28 @@
 import streamlit as st
+from const import Constants
 from db import get_submit
 from utils import Phase, get_current_phase, to_imagebase64, to_ranking
-from const import Constants
+
 
 def show_leaderboard(phase: Phase):
     def rank_styler(x):
-        color = 'white'
-        styles = 'font-weight: normal; font-size: 12px;'
+        color = "white"
+        styles = "font-weight: normal; font-size: 12px;"
         if x["rank"] == 1:
-            styles = 'font-weight: bold; font-size: 20px;'
-            color = 'rgba(255, 215, 0, 0.6)'
-            return [f'background-color: {color}; {styles};' for _ in x]
+            styles = "font-weight: bold; font-size: 20px;"
+            color = "rgba(255, 215, 0, 0.6)"
+            return [f"background-color: {color}; {styles};" for _ in x]
         elif x["rank"] == 2:
-            styles = 'font-weight: bold; font-size: 20px;'
-            color = 'rgba(192, 192, 192, 0.6)'
-            return [f'background-color: {color}; {styles};' for _ in x]
+            styles = "font-weight: bold; font-size: 20px;"
+            color = "rgba(192, 192, 192, 0.6)"
+            return [f"background-color: {color}; {styles};" for _ in x]
         elif x["rank"] == 3:
-            styles = 'font-weight: bold; font-size: 20px;'
-            color = 'rgba(205, 127, 50, 0.6)'
-            return [f'background-color: {color}; {styles};' for _ in x]
+            styles = "font-weight: bold; font-size: 20px;"
+            color = "rgba(205, 127, 50, 0.6)"
+            return [f"background-color: {color}; {styles};" for _ in x]
 
-        return ['' for _ in x]
+        return ["" for _ in x]
 
-    
-    
     if phase == Phase.public:
         st.write("## Public Leaderboard")
         submit = get_submit()
@@ -33,32 +32,36 @@ def show_leaderboard(phase: Phase):
         progress_min = ranking["progress"].min()
         n_row = ranking.shape[0]
 
-
         ranking["icon"] = ranking["icon"].apply(to_imagebase64)
 
+        ranking_styled = ranking.style.apply(rank_styler, axis=1)
 
-        ranking_styled = ranking.style.apply(
-            rank_styler, axis=1
-        )
+        user_cols = [col for col in ranking.columns if col.startswith("user")]
+
+        column_config = {
+            "rank": st.column_config.NumberColumn(width=50),
+            "teamname": st.column_config.TextColumn(label="Team Name", width=300),
+            "icon": st.column_config.ImageColumn(label="", width=150),
+            "progress": st.column_config.ProgressColumn(
+                width=75,
+                min_value=progress_min - 0.01,
+                max_value=progress_max,
+                format=" ",
+                label="",
+            ),
+            "score": st.column_config.NumberColumn(width=150, format="%.5f"),
+            "submitcount": st.column_config.NumberColumn(width=50),
+            "lastsubmit": {},
+        }
+
+        for col in user_cols:
+            column_config[col] = st.column_config.ImageColumn(label="", width=50)
 
         st.dataframe(
             ranking_styled,
             hide_index=True,
             height=35 * n_row,
-            column_config={
-                "rank": st.column_config.NumberColumn(width=50),
-                "teamname": st.column_config.TextColumn(label="Team Name", width=300),
-                "icon": st.column_config.ImageColumn(label="", width=150),
-                "user1icon": st.column_config.ImageColumn(label="", width=50),
-                "user2icon": st.column_config.ImageColumn(label="", width=50),
-                "user3icon": st.column_config.ImageColumn(label="", width=50),
-                "progress": st.column_config.ProgressColumn(
-                    width=75, min_value=progress_min - 0.01, max_value=progress_max, format=" ", label=""
-                ),
-                "score": st.column_config.NumberColumn(width=150, format="%.5f"),
-                "submitcount": st.column_config.NumberColumn(width=50),
-                "lastsubmit": {},
-            },
+            column_config=column_config,
             use_container_width=True,
         )
 
@@ -72,7 +75,6 @@ def show_leaderboard(phase: Phase):
 
         progress_max = private_lb["progress"].max()
         progress_min = private_lb["progress"].min()
-    
 
         # shake を計算
         # 各 teamname に対して、public の rank - private の rank を計算
@@ -101,34 +103,41 @@ def show_leaderboard(phase: Phase):
                 return "color: #FF6347"
 
             return ""
-        
-        private_lb_styled = private_lb.style.apply(
-            rank_styler, axis=1
-        ).applymap(shake_styler, subset=["shake"])
+
+        private_lb_styled = private_lb.style.apply(rank_styler, axis=1).applymap(
+            shake_styler, subset=["shake"]
+        )
+
+        column_config = {
+            "rank": st.column_config.NumberColumn(width=50),
+            "teamname": st.column_config.TextColumn(label="Team Name", width=300),
+            "icon": st.column_config.ImageColumn(label="", width=150),
+            "progress": st.column_config.ProgressColumn(
+                width=75,
+                min_value=progress_min - 0.01,
+                max_value=progress_max,
+                format=" ",
+                label="",
+            ),
+            "score": st.column_config.NumberColumn(width=150, format="%.5f"),
+            "submitcount": st.column_config.NumberColumn(width=50),
+            "lastsubmit": {},
+            "shake": {},
+        }
+
+        user_cols = [col for col in private_lb.columns if col.startswith("user")]
+
+        for col in user_cols:
+            column_config[col] = st.column_config.ImageColumn(label="", width=50)
 
         st.write("### Private Leaderboard")
         st.dataframe(
             private_lb_styled,
             hide_index=True,
             height=35 * 35,
-            column_config={
-                "rank": st.column_config.NumberColumn(width=50),
-                "teamname": st.column_config.TextColumn(label="Team Name", width=300),
-                "icon": st.column_config.ImageColumn(label="", width=150),
-                "user1icon": st.column_config.ImageColumn(label="", width=50),
-                "user2icon": st.column_config.ImageColumn(label="", width=50),
-                "user3icon": st.column_config.ImageColumn(label="", width=50),
-                "progress": st.column_config.ProgressColumn(
-                    width=75, min_value=progress_min - 0.01, max_value=progress_max, format=" ", label=""
-                ),
-                "score": st.column_config.NumberColumn(width=150, format="%.5f"),
-                "submitcount": st.column_config.NumberColumn(width=50),
-                "lastsubmit": {},
-                "shake": {},    
-            },
+            column_config=column_config,
             use_container_width=True,
         )
-
 
 
 def select_leaderboard(_env):
