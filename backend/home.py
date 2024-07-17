@@ -95,10 +95,6 @@ def main(session_state):
     elif selected == "Data":
         data.select_data(env)
 
-    # st.sidebar.link_button(
-    #     "traQ に現在の順位を投稿する",
-    #     f"https://q.trap.jp/share-target?text={get_sns_message(get_submit(), env['teamname'])}",
-    # )
 
 
 if __name__ == "__main__":
