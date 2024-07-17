@@ -33,6 +33,9 @@ oauth2 = OAuth2Component(
 
 
 def is_login():
+    if os.environ.get("DEV"):
+        return True
+    
     if "token" in st.session_state:
         return True
     else:
@@ -55,6 +58,9 @@ def login():
     st.stop()
 
 def get_username():
+    if os.environ.get("DEV"):
+        return "abap34"
+
     login = is_login()
     if not login:
         st.toast("Login required!", icon="⚠️")
