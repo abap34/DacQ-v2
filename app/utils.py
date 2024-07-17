@@ -139,9 +139,10 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
 
     ranking = pd.merge(ranking, members_df, left_on="teamid", right_on="id")
 
-    ranking["user1icon"] = ranking["user1"].apply(name_to_icon_url)
-    ranking["user2icon"] = ranking["user2"].apply(name_to_icon_url)
-    ranking["user3icon"] = ranking["user3"].apply(name_to_icon_url)
+    user_col = [col for col in members_df.columns if col.startswith("user")]
+
+    for col in user_col:
+        ranking[col] = ranking[col].apply(name_to_icon_url)
 
     ranking["teamname"] = ranking["teamid"].apply(get_teamname)
 
@@ -149,22 +150,9 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
 
     ranking["progress"] = Constants.progress_scaler(ranking["score"])
 
-    ranking = ranking[
-        [
-            "rank",
-            "teamname",
-            "icon",
-            "user1icon",
-            "user2icon",
-            "user3icon",
-            "progress",
-            "score",
-            "submitcount",
-            "lastsubmit",
-        ]
-    ]
+    use_col = ["rank", "teamname", "icon"] + user_col + ["progress", "score", "submitcount", "lastsubmit"]
 
-    return ranking
+    return ranking[use_col]
 
 
 def get_score_progress(submitlog: pd.DataFrame, teamname: str) -> pd.DataFrame:

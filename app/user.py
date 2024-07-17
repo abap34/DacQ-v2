@@ -74,9 +74,11 @@ def get_username():
 def get_all_user() -> np.ndarray:
     team_setting = get_team_setting()
 
-    all_user = pd.concat(
-        [team_setting["user1"], team_setting["user2"], team_setting["user3"]],
-        ignore_index=True,
-    )
+    # check user name is unique
+    user_col = [col for col in team_setting.columns if col.startswith("user")]
+    all_user = team_setting[user_col].melt()["value"].str.strip()
+    all_user = all_user.dropna()
+
+
 
     return all_user.values
