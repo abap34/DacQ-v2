@@ -1,12 +1,11 @@
-import streamlit as st
-from streamlit_option_menu import option_menu
+import os
 
-from db import get_submit
-from sections import data, leaderboard, rules, score_log, submit, team_setting
+import streamlit as st
 from setup import setup
-from utils import get_sns_message
-import os 
+from streamlit_option_menu import option_menu
 from user import is_login, login
+
+from sections import data, leaderboard, rules, score_log, submit, team_setting
 
 
 def main(session_state):
@@ -26,10 +25,9 @@ def main(session_state):
     )
 
     if session_state["attendee"]:
-        option =  ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"]
+        option = ["LeaderBoard", "Submit", "Data", "Rules", "Score Log", "Team Setting"]
     else:
         option = ["LeaderBoard", "Score Log"]
-
 
     selected = option_menu(
         None,
@@ -79,7 +77,9 @@ def main(session_state):
     # ゲストユーザはここまで読める ここで return
 
     if not session_state["attendee"]:
-        st.warning("ゲストとしてログインしています。順位表の閲覧のみが可能でサブミットなどはできません。間違いと思われる場合は運営にお問い合わせください。")
+        st.warning(
+            "ゲストとしてログインしています。順位表の閲覧のみが可能でサブミットなどはできません。間違いと思われる場合は運営にお問い合わせください。"
+        )
         return
 
     if selected == "Submit":
@@ -88,13 +88,11 @@ def main(session_state):
     elif selected == "Rules":
         rules.select_rules(env)
 
-
     elif selected == "Team Setting":
         team_setting.select_team_setting(env)
 
     elif selected == "Data":
         data.select_data(env)
-
 
 
 if __name__ == "__main__":
@@ -113,15 +111,12 @@ if __name__ == "__main__":
         )
 
         st.stop()
-    
 
-    
-    
     if not is_login():
         st.toast("Login required!", icon="⚠️")
         login()
         st.stop()
-        
+
     if "has_run_setup" not in st.session_state:
         setup()
 
