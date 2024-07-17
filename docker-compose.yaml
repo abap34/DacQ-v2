@@ -24,8 +24,8 @@ services:
       timeout: 10s
       retries: 3
 
-  backend:
-    build: ./backend
+  app:
+    build: ./app
     ports:
       - "5001:5001"
     depends_on:
@@ -40,7 +40,7 @@ services:
       TOKEN_URL: "${TOKEN_URL}"
 
     volumes:
-      - ./backend:/app  
+      - ./app:/app  
 
 
   adminer:
