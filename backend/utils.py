@@ -4,17 +4,16 @@ import io
 from dataclasses import dataclass
 from datetime import timezone
 from typing import Tuple
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
+import requests
 import streamlit as st
-from PIL import Image
-
 from const import Constants
-from team import get_teamicon, get_teamid, get_teamname
+from PIL import Image
+from team import get_members, get_team_df, get_teamicon, get_teamid, get_teamname
 from user import get_username
-
-from zoneinfo import ZoneInfo
 
 
 class Phase:
@@ -51,6 +50,7 @@ def load_env():
         "teamid": teamid,
         "teamicon": teamicon,
     }
+
 
 def load_rules():
     with open("static/rules.md", "r") as f:
@@ -108,7 +108,11 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
 
     if phase == Phase.private:
         # 各チーム, 最新の2つのサブミットだけを残す
-        submitlog = submitlog.sort_values("post_date").groupby("teamid").tail(Constants.PRIVATE_SUBMIT_COUNT)
+        submitlog = (
+            submitlog.sort_values("post_date")
+            .groupby("teamid")
+            .tail(Constants.PRIVATE_SUBMIT_COUNT)
+        )
 
     # sort してチームごとに一番上取ってこれだけ残すことで順位表に変換
     ranking = (
@@ -116,18 +120,16 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
     )
 
     ranking["rank"] = range(1, len(ranking) + 1)
-    ranking["submitcount"] = ranking["username"].map(
-        submitlog["username"].value_counts()
-    )
+    ranking["submitcount"] = ranking["teamid"].map(submitlog["teamid"].value_counts())
 
     now = datetime.datetime.now(ZoneInfo("Asia/Tokyo"))
-    lastsubmit_dates = submitlog.groupby("username")["post_date"].max()
+    lastsubmit_dates = submitlog.groupby("teamid")["post_date"].max()
 
     # post_date が JST で保存されているので、そのままに
-    lastsubmit_dates = lastsubmit_dates.dt.tz_localize(ZoneInfo("Asia/Tokyo")) 
+    lastsubmit_dates = lastsubmit_dates.dt.tz_localize(ZoneInfo("Asia/Tokyo"))
 
-    ranking["lastsubmit"] = ranking["username"].map(
-        now - lastsubmit_dates - datetime.timedelta(hours=9)
+    ranking["lastsubmit"] = ranking["teamid"].map(
+        now - lastsubmit_dates 
     )
 
     ranking["lastsubmit"] = ranking["lastsubmit"].apply(readable_timedelta)
@@ -135,12 +137,33 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
     # アイコン用の列追加
     ranking["icon"] = ranking["teamid"].apply(get_teamicon)
 
+    members_df = get_team_df(ranking["teamid"].values)
+
+    ranking = pd.merge(ranking, members_df, left_on="teamid", right_on="id")
+
+    ranking["user1icon"] = ranking["user1"].apply(name_to_icon_url)
+    ranking["user2icon"] = ranking["user2"].apply(name_to_icon_url)
+    ranking["user3icon"] = ranking["user3"].apply(name_to_icon_url)
+
     ranking["teamname"] = ranking["teamid"].apply(get_teamname)
 
     ranking = ranking.rename(columns={sort_col: "score"})
 
+    ranking["progress"] = Constants.progress_scaler(ranking["score"])
+
     ranking = ranking[
-        ["rank", "icon", "teamname", "score", "submitcount", "lastsubmit"]
+        [
+            "rank",
+            "teamname",
+            "icon",
+            "user1icon",
+            "user2icon",
+            "user3icon",
+            "progress",
+            "score",
+            "submitcount",
+            "lastsubmit",
+        ]
     ]
 
     return ranking
@@ -163,8 +186,24 @@ def get_score_progress(submitlog: pd.DataFrame, teamname: str) -> pd.DataFrame:
     return team_subs
 
 
+def get_teamrank(submitlog: pd.DataFrame, teamname: str) -> int:
+    submitlog["teamid"] = submitlog["username"].apply(get_teamid)
+
+    # これは常に public_score で ok
+    ascending = Constants.SCORE_BETTERDIRECTION == "larger"
+    sort_col = "public_score"
+    # sort してチームごとに一番上取ってこれだけ残すことで順位表に変換
+    ranking = (
+        submitlog.sort_values(sort_col, ascending=ascending).groupby("teamid").head(1)
+    )
+
+    ranking["rank"] = range(1, len(ranking) + 1)
+
+    return ranking[ranking["teamname"] == teamname]["rank"].values[0]
+
+
 def get_sns_message(submitlog: pd.DataFrame, teamname: str) -> str:
-    ranking = to_ranking(submitlog)
+    ranking = get_teamrank(submitlog, teamname)
 
     rank = ranking[ranking["teamname"] == teamname]
 
