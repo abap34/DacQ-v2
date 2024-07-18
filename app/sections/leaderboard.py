@@ -1,7 +1,36 @@
+import numpy as np
 import streamlit as st
 from const import Constants
 from db import get_submit
 from utils import Phase, get_current_phase, to_imagebase64, to_ranking
+
+
+def build_column_config(user_cols, progress_max, progress_min):
+    if np.isnan(progress_max):
+        progress_max = 1
+    if np.isnan(progress_min):
+        progress_min = 0
+
+    column_config = {
+        "rank": st.column_config.NumberColumn(width=50),
+        "teamname": st.column_config.TextColumn(label="Team Name", width=300),
+        "icon": st.column_config.ImageColumn(label="", width=150),
+        "progress": st.column_config.ProgressColumn(
+            width=75,
+            min_value=progress_min - 0.01,
+            max_value=progress_max,
+            format=" ",
+            label="",
+        ),
+        "score": st.column_config.NumberColumn(width=150, format="%.5f"),
+        "submitcount": st.column_config.NumberColumn(width=50),
+        "lastsubmit": {},
+    }
+
+    for col in user_cols:
+        column_config[col] = st.column_config.ImageColumn(label="", width=50)
+
+    return column_config
 
 
 def show_leaderboard(phase: Phase):
@@ -38,29 +67,11 @@ def show_leaderboard(phase: Phase):
 
         user_cols = [col for col in ranking.columns if col.startswith("user")]
 
-        column_config = {
-            "rank": st.column_config.NumberColumn(width=50),
-            "teamname": st.column_config.TextColumn(label="Team Name", width=300),
-            "icon": st.column_config.ImageColumn(label="", width=150),
-            "progress": st.column_config.ProgressColumn(
-                width=75,
-                min_value=progress_min - 0.01,
-                max_value=progress_max,
-                format=" ",
-                label="",
-            ),
-            "score": st.column_config.NumberColumn(width=150, format="%.5f"),
-            "submitcount": st.column_config.NumberColumn(width=50),
-            "lastsubmit": {},
-        }
-
-        for col in user_cols:
-            column_config[col] = st.column_config.ImageColumn(label="", width=50)
+        column_config = build_column_config(user_cols, progress_max, progress_min)
 
         st.dataframe(
             ranking_styled,
             hide_index=True,
-            height=35 * n_row,
             column_config=column_config,
             use_container_width=True,
         )
@@ -68,8 +79,10 @@ def show_leaderboard(phase: Phase):
     if phase == Phase.private:
         st.write("## Private Leaderboard")
         submit = get_submit()
+
         public_lb = to_ranking(submit, phase=Phase.public)
         public_lb["icon"] = public_lb["icon"].apply(to_imagebase64)
+
         private_lb = to_ranking(submit, phase=Phase.private)
         private_lb["icon"] = private_lb["icon"].apply(to_imagebase64)
 
@@ -77,7 +90,6 @@ def show_leaderboard(phase: Phase):
         progress_min = private_lb["progress"].min()
 
         # shake を計算
-        # 各 teamname に対して、public の rank - private の rank を計算
         shake = public_lb.merge(
             private_lb, on="teamname", suffixes=("_public", "_private")
         )
@@ -108,33 +120,14 @@ def show_leaderboard(phase: Phase):
             shake_styler, subset=["shake"]
         )
 
-        column_config = {
-            "rank": st.column_config.NumberColumn(width=50),
-            "teamname": st.column_config.TextColumn(label="Team Name", width=300),
-            "icon": st.column_config.ImageColumn(label="", width=150),
-            "progress": st.column_config.ProgressColumn(
-                width=75,
-                min_value=progress_min - 0.01,
-                max_value=progress_max,
-                format=" ",
-                label="",
-            ),
-            "score": st.column_config.NumberColumn(width=150, format="%.5f"),
-            "submitcount": st.column_config.NumberColumn(width=50),
-            "lastsubmit": {},
-            "shake": {},
-        }
-
         user_cols = [col for col in private_lb.columns if col.startswith("user")]
 
-        for col in user_cols:
-            column_config[col] = st.column_config.ImageColumn(label="", width=50)
+        column_config = build_column_config(user_cols, progress_max, progress_min)
 
         st.write("### Private Leaderboard")
         st.dataframe(
             private_lb_styled,
             hide_index=True,
-            height=35 * 35,
             column_config=column_config,
             use_container_width=True,
         )
