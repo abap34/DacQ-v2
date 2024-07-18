@@ -25,6 +25,9 @@ class Phase:
 
 
 def get_current_phase() -> Phase:
+    if st.session_state["DEV"] and "phase" in st.session_state:
+        return st.session_state["phase"]
+
     now = pd.Timestamp.now(tz=ZoneInfo("Asia/Tokyo"))
     if now < Constants.DATE["public_start"]:
         return Phase.before_public
@@ -107,7 +110,7 @@ def to_ranking(submitlog: pd.DataFrame, phase: Phase = Phase.public) -> pd.DataF
     submitlog["teamid"] = submitlog["username"].apply(get_teamid)
 
     if phase == Phase.private:
-        # 各チーム, 最新の2つのサブミットだけを残す
+        # 各チーム, 最新の `PRIVATE_SUBMIT_COUNT` だけ残す
         submitlog = (
             submitlog.sort_values("post_date")
             .groupby("teamid")

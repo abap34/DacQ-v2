@@ -7,7 +7,9 @@ from team import setup_team
 from user import get_all_user, get_username, is_login, login
 from utils import load_env
 
-
+def check_devmode():
+    if os.environ.get("DEV"):
+        st.session_state["DEV"] = True
 
 def is_attendee():
     username = get_username()
@@ -26,6 +28,7 @@ def is_attendee():
 
 def setup():
     init_db()
+    check_devmode()
     setup_team(skip=True)
 
     st.set_page_config(
