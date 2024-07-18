@@ -4,6 +4,7 @@ import streamlit as st
 from setup import setup
 from streamlit_option_menu import option_menu
 from user import is_login, login
+from utils import Phase, get_current_phase
 
 from sections import data, leaderboard, rules, score_log, submit, team_setting
 
@@ -57,6 +58,23 @@ def main(session_state):
         width=180,
     )
 
+    if st.session_state["DEV"]:
+        st.sidebar.markdown(
+        f"""
+
+        ## Phase: {get_current_phase()}
+
+        """
+        )
+
+        selected_phase = st.selectbox(
+            "Phase",
+            ["before_public", "public", "between", "private", "after_private"],
+        )
+
+        if st.button("Change Phase"):
+            st.session_state["phase"] = getattr(Phase, selected_phase)
+
     st.sidebar.markdown(
         f"""
 
@@ -96,22 +114,6 @@ def main(session_state):
 
 
 if __name__ == "__main__":
-    if os.environ.get("NS", False):
-        st.write(
-            """
-
-            # 重要なおしらせ
-
-            この url は現在使用されていません。
-
-            [dacq.abap34.com](https://dacq.abap34.com) をご利用ください。
-            
-
-            """
-        )
-
-        st.stop()
-
     if not is_login():
         st.toast("Login required!", icon="⚠️")
         login()
