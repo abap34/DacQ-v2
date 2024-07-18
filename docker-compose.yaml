@@ -38,6 +38,7 @@ services:
       REDIRECT_URI: "${REDIRECT_URI}"
       AUTHORIZE_URL: "${AUTHORIZE_URL}"
       TOKEN_URL: "${TOKEN_URL}"
+      DEV_USER: "${DEV_USER}"
 
     volumes:
       - ./app:/app  
