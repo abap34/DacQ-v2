@@ -59,7 +59,7 @@ def login():
 
 def get_username():
     if os.environ.get("DEV"):
-        return "abap34"
+        return os.environ["DEV_USER"]
 
     login = is_login()
     if not login:
