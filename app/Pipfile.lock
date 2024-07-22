@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "fabcc7c73d724e8b3ea7c9da6e9e98cfbbe0e90038badc6eee56202bc8d01c34"
+            "sha256": "fb9b9abb5f56bf64f3408556ec1ff26923db0aad472889f441b574943f00670e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -280,6 +280,14 @@
             "markers": "python_version >= '3.6'",
             "version": "==0.4"
         },
+        "exceptiongroup": {
+            "hashes": [
+                "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b",
+                "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"
+            ],
+            "markers": "python_version < '3.11'",
+            "version": "==1.2.2"
+        },
         "faker": {
             "hashes": [
                 "sha256:2107618cf306bb188dcfea3e5cfd94aa92d65c7293a2437c1e96a99c83274755",
@@ -407,11 +415,11 @@
         },
         "httpx-oauth": {
             "hashes": [
-                "sha256:3ccf35760d157a9abbf4a78024b744b5532ec5d4d03fc1db3e71123ce9d33e32",
-                "sha256:e58c60bce99568b4e98ce88abf0e2111a9b6c7f79c29bea88cc89d9edb78dfbc"
+                "sha256:39ac91b2b98b8bf97176bc55a70a77cb9cff6cb3a964d2abb1b1256f901aa8ef",
+                "sha256:b4bb1115d7f18fd88718feb70767d6badc72891afee2d32d2af7a1d9395a11f7"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==0.14.1"
+            "version": "==0.15.0"
         },
         "idna": {
             "hashes": [
@@ -1744,12 +1752,12 @@
         },
         "streamlit-oauth": {
             "hashes": [
-                "sha256:c6d8f759c9dc7472f3e339c8c8934fd4d728cac96cf1f6841472397adca0beb3",
-                "sha256:c7c7d0e824682cb190e7cff0fc6e57536e7d56d497c4ae8b044161c98cef7346"
+                "sha256:17cec7d50d8e023eeb0037b33466614988383ebdf0b3dce7cca09ac533c8ebc1",
+                "sha256:cff0301d60d2dbcbef594d346ff336865f17ff343f3666129d24c9d85e093893"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9'",
-            "version": "==0.1.10"
+            "version": "==0.1.11"
         },
         "streamlit-option-menu": {
             "hashes": [
