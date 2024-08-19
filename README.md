@@ -7,7 +7,10 @@
    - ラベルデータ
    - チーム設定データ
    - Public / Private の分割
-3. `.env` に環境変数を設定する。
+3. ルールやデータの説明を追加する.
+   - `app/static/data_description.md`
+   - `app/static/rules.md` 
+4. `.env` に環境変数を設定する。
 ```sh
 TOKEN_URL=
 CLIENT_ID=
