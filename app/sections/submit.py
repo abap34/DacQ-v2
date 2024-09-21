@@ -65,10 +65,6 @@ def select_submit(env):
                                 delta=f"{public_score - prev_best:.5f}",
                             )
 
-                        st.link_button(
-                            "スコア更新を traQ に共有する!",
-                            f"https://q.trap.jp/share-target?text=最高スコアを更新しました！今のスコアは{public_score:.5f}です :nityaa_harsh:",
-                        )
 
                     add_submit(env["username"], public_score, private_score)
         except Exception as e:
